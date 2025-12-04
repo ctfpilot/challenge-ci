@@ -17,5 +17,5 @@ jobs:
     secrets:
       RELEASE_GH_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
     with:
-      repository: ctfpilot/<repository-name>
+      repository: ctfpilot/challenge-ci
       ENVIRONMENT: Release

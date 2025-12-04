@@ -1,13 +1,6 @@
-# CTF Pilot's Template Repository
+# CTF Pilot's Challenge CI
 
-## Template information
-
-This repository, is a template repository for open-source projects within CTF Pilot.
-
-It provices a EUPL-1.2 License, release system and other standard files.
-
-Please remove this section, and replace with relevant information.  
-Replace `<repository-name>` with the repository name in `.github/workflows/cla-assistant.yml`and `.github/workflows/release.yml`.
+This repository contains GitHub Actions workflows and related resources for CTF Pilot's Challenge Continuous Integration (CI) system.
 
 ## Contributing
 
