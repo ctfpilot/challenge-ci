@@ -13,5 +13,5 @@ jobs:
       packages: write
       id-token: write
     with:
-      runs-on: ubuntu-latest
-      toolkit-path: ./challenge-toolkit/
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"
