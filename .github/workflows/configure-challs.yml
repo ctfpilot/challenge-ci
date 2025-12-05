@@ -70,7 +70,7 @@ jobs:
             category_path="challenges/$category"
             if [ ! -d "$category_path" ] || [ -z "$(ls -A "$category_path")" ]; then
               echo "Warning: Category directory '$category_path' does not exist or is empty."
-              echo "::notice title=No challenges found in category::$category The category directory is missing or empty. No challenges to process in this category."
+              echo "::notice title=No challenges found in category '$category'::The category directory '$category_path' is missing or empty. No challenges to process in this category."
               continue
             fi
 
