@@ -42,12 +42,24 @@ jobs:
       - name: Generate list of challenges
         id: challenges
         run: |
-          categories="$(ls challenges)"
-          categories=$(echo "$categories" | tr ' ' ',')
+          if [ -d "challenges" ] && [ "$(ls -A challenges)" ]; then
+            categories=$(echo "$(ls challenges)" | tr ' ' ',')
+          else
+            echo "Warning: 'challenges' directory does not exist or is empty."
+            echo "::notice title=No challenges found::The 'challenges' directory is missing or empty. No challenges to process."
+            exit 0
+          fi
 
           full_challenges=""
           for category in $(echo "$categories" | tr ',' ' '); do
-            for challenge in $(ls "challenges/$category"); do
+            category_path="challenges/$category"
+            if [ ! -d "$category_path" ] || [ -z "$(ls -A "$category_path")" ]; then
+              echo "Warning: Category directory '$category_path' does not exist or is empty."
+              echo "::notice title=No challenges found in category::$category The category directory is missing or empty. No challenges to process in this category."
+              continue
+            fi
+
+            for challenge in $(ls "$category_path"); do
               full_challenges="$full_challenges,$category/$challenge"
             done
           done

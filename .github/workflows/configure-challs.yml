@@ -74,7 +74,7 @@ jobs:
               continue
             fi
 
-            for challenge in $(ls "challenges/$category"); do
+            for challenge in $(ls "$category_path"); do
               full_challenges="$full_challenges,$category/$challenge"
             done
           done
