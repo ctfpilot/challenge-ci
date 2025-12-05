@@ -79,7 +79,9 @@ jobs:
             done
           done
 
-          full_challenges=$(echo "$full_challenges" | cut -c 2-)
+          if [ -n "$full_challenges" ]; then
+            full_challenges=$(echo "$full_challenges" | cut -c 2-)
+          fi
 
           # Convert to json array
           full_challenges=$(echo "$full_challenges" | jq -R 'split(",")')
