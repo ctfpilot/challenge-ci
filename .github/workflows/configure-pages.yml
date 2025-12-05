@@ -62,7 +62,6 @@ jobs:
           if [ -z "$pages" ]; then
             echo "No pages found, skipping page retrieval."
             echo "::debug::No pages found, exiting."
-            echo "pages=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -75,7 +74,7 @@ jobs:
           INPUT_PAGES: ${{ steps.get-pages.outputs.pages }}
 
       - name: Check if this update contains changes in any page
-        if: ${{ steps.get-pages.outputs.pages != '[]' }}
+        if: ${{ steps.get-pages.outputs.pages != '' }}
         id: check-changes
         uses: dorny/paths-filter@v3
         with:
@@ -84,7 +83,7 @@ jobs:
 
   # Matrix strategy to run the template rendering for each page
   ci:
-    if: ${{ needs.get_pages.outputs.pages != '[]' && needs.get_pages.outputs.changes && needs.get_pages.outputs.changes != '[]' }}
+    if: ${{ needs.get_pages.outputs.pages != '' && needs.get_pages.outputs.changes && needs.get_pages.outputs.changes != '[]' }}
     strategy:
       matrix:
         page: ${{ fromJson(needs.get_pages.outputs.changes) }}
