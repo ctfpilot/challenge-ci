@@ -73,6 +73,10 @@ jobs:
 
           if [ -n "$full_challenges" ]; then
             full_challenges=$(echo "$full_challenges" | cut -c 2-)
+          else
+            echo "No challenges found in any category, exiting."
+            echo "::notice title=No challenges found::No challenges found in any category.
+            exit 0
           fi
 
           for challenge in $(echo "$full_challenges" | tr ',' ' '); do
