@@ -90,13 +90,13 @@ jobs:
     # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
     uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@main
     with:
-      name: ${{ github.event.inputs.name }}
-      author: ${{ github.event.inputs.author }}
-      category: ${{ github.event.inputs.category }}
-      difficulty: ${{ github.event.inputs.difficulty }}
-      type: ${{ github.event.inputs.type }}
-      flag: ${{ github.event.inputs.flag }}
-      points: ${{ github.event.inputs.points }}
+      name: ${{ inputs.name }}
+      author: ${{ inputs.author }}
+      category: ${{ inputs.category }}
+      difficulty: ${{ inputs.difficulty }}
+      type: ${{ inputs.type }}
+      flag: ${{ inputs.flag }}
+      points: ${{ inputs.points }}
       toolkit-path: "./challenge-toolkit/"
 ```
 

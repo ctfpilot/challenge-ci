@@ -1,5 +1,5 @@
 name: Create challenge
-run-name: Create challenge ${{ github.event.inputs.name }} by ${{ github.event.inputs.author }}
+run-name: Create challenge ${{ inputs.name }} by ${{ inputs.author }}
 
 on:
   workflow_call:
@@ -75,7 +75,7 @@ permissions:
 jobs:
   create_challenge:
     name: Create challenge
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     outputs:
       pr: ${{ steps.pr.outputs.pr_url }}
       slug: ${{ steps.slugify.outputs.slug }}
@@ -97,7 +97,7 @@ jobs:
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       # Create challenge
       - name: Create challenge
@@ -114,35 +114,35 @@ jobs:
             --instanced-type "$INPUT_INSTANCED_TYPE" \
             --no-prompts
         env:
-          INPUT_NAME: ${{ github.event.inputs.name }}
-          INPUT_CATEGORY: ${{ github.event.inputs.category }}
-          INPUT_DIFFICULTY: ${{ github.event.inputs.difficulty }}
-          INPUT_AUTHOR: ${{ github.event.inputs.author }}
-          INPUT_FLAG: ${{ github.event.inputs.flag }}
-          INPUT_TYPE: ${{ github.event.inputs.type }}
-          INPUT_INSTANCED_TYPE: ${{ github.event.inputs.instanced_type }}
-          INPUT_POINTS: ${{ github.event.inputs.points || 1000 }}
-          INPUT_MIN_POINTS: ${{ github.event.inputs.min-points || 10 }}
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_FLAG: ${{ inputs.flag }}
+          INPUT_TYPE: ${{ inputs.type }}
+          INPUT_INSTANCED_TYPE: ${{ inputs.instanced_type }}
+          INPUT_POINTS: ${{ inputs.points || 1000 }}
+          INPUT_MIN_POINTS: ${{ inputs.min-points || 10 }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       # Get slug
       - name: Get slug
         id: slugify
         run: echo "slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify --name "$INPUT_NAME")" >> "$GITHUB_OUTPUT"
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
-          INPUT_NAME: ${{ github.event.inputs.name }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_NAME: ${{ inputs.name }}
 
       # Commit changes to new branch
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Create challenge: ${{ github.event.inputs.name }} by ${{ github.event.inputs.author }}"
+          commit_message: "Create challenge: ${{ inputs.name }} by ${{ inputs.author }}"
           create_branch: true
           branch: challenge/${{ steps.slugify.outputs.slug }}
 
       # Open pull request
       - name: Open pull request
-        if: ${{ github.event.inputs.issue == 0 }}
+        if: ${{ inputs.issue == 0 }}
         id: pr
         run: >-
           URL=$(gh pr create -B develop -H "challenge/$INPUT_SLUG" \
@@ -156,14 +156,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_ACTOR: ${{ github.actor }}
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
-          INPUT_NAME: ${{ github.event.inputs.name }}
-          INPUT_AUTHOR: ${{ github.event.inputs.author }}
-          INPUT_CATEGORY: ${{ github.event.inputs.category }}
-          INPUT_DIFFICULTY: ${{ github.event.inputs.difficulty }}
-          INPUT_MILESTONE: ${{ github.event.inputs.milestone || 'Challenges' }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
 
       - name: Open pull request on existing issue
-        if: ${{ github.event.inputs.issue != 0 }}
+        if: ${{ inputs.issue != 0 }}
         run: >-
           URL=$(gh pr create -B develop -H "challenge/$INPUT_SLUG" \
             --title "Create challenge: $INPUT_NAME" \
@@ -176,17 +176,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_ACTOR: ${{ github.actor }}
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
-          INPUT_NAME: ${{ github.event.inputs.name }}
-          INPUT_AUTHOR: ${{ github.event.inputs.author }}
-          INPUT_CATEGORY: ${{ github.event.inputs.category }}
-          INPUT_DIFFICULTY: ${{ github.event.inputs.difficulty }}
-          INPUT_MILESTONE: ${{ github.event.inputs.milestone || 'Challenges' }}
-          INPUT_ISSUE: ${{ github.event.inputs.issue }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+          INPUT_ISSUE: ${{ inputs.issue }}
 
   create_issue:
-    if: ${{ github.event.inputs.issue == 0 }}
+    if: ${{ inputs.issue == 0 }}
     name: Create issue
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     needs:
       - create_challenge
     permissions:
@@ -223,13 +223,12 @@ jobs:
           GH_ACTOR: ${{ github.actor }}
           GH_REPO: ${{ github.repository }}
           GH_PR: ${{ needs.create_challenge.outputs.pr }}
-          INPUT_NAME: ${{ github.event.inputs.name }}
+          INPUT_NAME: ${{ inputs.name }}
           INPUT_SLUG: ${{ needs.create_challenge.outputs.slug }}
-          INPUT_MILESTONE: ${{ github.event.inputs.milestone || 'Challenges' }}
-          INPUT_AUTHOR: ${{ github.event.inputs.author }}
-          INPUT_FLAG: ${{ github.event.inputs.flag }}
-          INPUT_INSTANCED: ${{ github.event.inputs.type == 'instanced' && 'Yes' || 'No' }}
-          INPUT_INSTANCED_TYPE: ${{ github.event.inputs.instanced_type }}
-          INPUT_CATEGORY: ${{ github.event.inputs.category }}
-          INPUT_DIFFICULTY: ${{ github.event.inputs.difficulty }}
-
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_FLAG: ${{ inputs.flag }}
+          INPUT_INSTANCED: ${{ inputs.type == 'instanced' && 'Yes' || 'No' }}
+          INPUT_INSTANCED_TYPE: ${{ inputs.instanced_type }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}

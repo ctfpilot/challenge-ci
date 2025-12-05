@@ -1,5 +1,5 @@
 name: Create challenge
-run-name: Create challenge ${{ github.event.inputs.name }} by ${{ github.event.inputs.author }}
+run-name: Create challenge ${{ inputs.name }} by ${{ inputs.author }}
 
 on:
   workflow_dispatch:
@@ -88,16 +88,16 @@ jobs:
       pull-requests: write
       issues: write
     with:
-      issue: ${{ github.event.inputs.issue }}
-      name: ${{ github.event.inputs.name }}
-      author: ${{ github.event.inputs.author }}
-      category: ${{ github.event.inputs.category }}
-      difficulty: ${{ github.event.inputs.difficulty }}
-      type: ${{ github.event.inputs.type }}
-      instanced_type: ${{ github.event.inputs.instanced_type }}
-      flag: ${{ github.event.inputs.flag }}
-      min-points: ${{ github.event.inputs.min-points }}
-      points: ${{ github.event.inputs.points }}
+      issue: ${{ inputs.issue }}
+      name: ${{ inputs.name }}
+      author: ${{ inputs.author }}
+      category: ${{ inputs.category }}
+      difficulty: ${{ inputs.difficulty }}
+      type: ${{ inputs.type }}
+      instanced_type: ${{ inputs.instanced_type }}
+      flag: ${{ inputs.flag }}
+      min-points: ${{ inputs.min-points }}
+      points: ${{ inputs.points }}
       milestone: "CTF Challenges"
       runs-on: "ubuntu-latest"
       toolkit-path: "./challenge-toolkit/"

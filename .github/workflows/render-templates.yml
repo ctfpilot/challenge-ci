@@ -23,7 +23,7 @@ permissions:
 jobs:
   render_templates:
     name: Render all templates
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       # Generate templates
       - name: Generate list of challenges
@@ -59,7 +59,7 @@ jobs:
             python3 "$INPUT_TOOLKIT"/src/ctf.py template handout "$challenge"
           done
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       - name: Configure git user
         run: |

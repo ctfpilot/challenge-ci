@@ -25,7 +25,7 @@ permissions:
 jobs:
   get_pages:
     name: Get pages
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     outputs:
       pages: ${{ steps.get-pages.outputs.pages }}
       changes: ${{ steps.check-changes.outputs.changes }}
@@ -71,7 +71,7 @@ jobs:
     name: Template rendering
     needs:
       - get_pages
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -83,7 +83,7 @@ jobs:
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       # -----------------------------------
       # Template rendering
@@ -94,7 +94,7 @@ jobs:
         run: |
           python3 "$INPUT_TOOLKIT"/src/ctf.py page "$INPUT_PAGE"
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_PAGE: ${{ matrix.page }}
 
       # -----------------------------------

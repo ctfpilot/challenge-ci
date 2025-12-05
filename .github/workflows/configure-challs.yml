@@ -27,7 +27,7 @@ permissions:
 jobs:
   get_challs:
     name: Get challs
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     outputs:
       categories: ${{ steps.get-categories.outputs.categories }}
       challenges: ${{ steps.get-challenges.outputs.challenges }}
@@ -95,7 +95,7 @@ jobs:
     name: Docker and template rendering
     needs:
       - get_challs
-    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -122,7 +122,7 @@ jobs:
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
 
       - name: Build and push Docker image
         run: |
@@ -130,7 +130,7 @@ jobs:
         env:
           GHCR_REGISTRY: ${{ env.GHCR_REGISTRY }}
           GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_CHALLENGE: ${{ matrix.challenge }}
 
       # -----------------------------------
@@ -145,7 +145,7 @@ jobs:
           python3 "$INPUT_TOOLKIT"/src/ctf.py template configmap "$INPUT_CHALLENGE"
           python3 "$INPUT_TOOLKIT"/src/ctf.py template handout "$INPUT_CHALLENGE"
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_CHALLENGE: ${{ matrix.challenge }}
 
       # -----------------------------------
