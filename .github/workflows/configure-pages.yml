@@ -58,7 +58,10 @@ jobs:
           INPUT_PAGES: ${{ steps.get-pages.outputs.pages }}
 
       - name: Generate paths filter for pages
+        id: generate-paths-filter
         run: |
+          touch paths-filter.yml
+
           pages=$(echo "$INPUT_PAGES")
           if [ -z "$pages" ]; then
             echo "No pages found, skipping page retrieval."

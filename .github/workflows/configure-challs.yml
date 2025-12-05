@@ -62,6 +62,8 @@ jobs:
       - name: Get challenges in each category
         id: get-challenges
         run: |
+          touch paths-filter.yml
+
           categories=$(echo "$INPUT_CATEGORIES")
           if [ -z "$categories" ]; then
             echo "challenges=[]" >> $GITHUB_OUTPUT
