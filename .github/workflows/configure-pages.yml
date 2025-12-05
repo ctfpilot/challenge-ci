@@ -98,7 +98,7 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
-        
+
       - name: Ensure submodules are fetched
         if: ${{ inputs.fetch-submodules == true }}
         run: git submodule update --init --recursive
