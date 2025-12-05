@@ -149,18 +149,18 @@ jobs:
           INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_NAME: ${{ inputs.name }}
 
-      # Check if challenge branch already exists
+      # Check if challenge branch already exists (remote)
       - name: Check if challenge branch exists
         run: |
-          # Fetch all branches
+          # Fetch all branches from origin so remote refs are available locally
           git fetch origin
 
-          # Check if the branch exists
-          if git show-ref --verify --quiet refs/heads/challenge/$INPUT_SLUG; then
-            echo "::error title=Challenge already exists::The challenge branch 'challenge/$INPUT_SLUG' already exists, indicating that the challenge has already been created. Please delete the branch and try again."
+          # Check if the branch exists on the remote (origin)
+          if git show-ref --verify --quiet refs/remotes/origin/challenge/$INPUT_SLUG; then
+            echo "::error title=Challenge already exists::The remote challenge branch 'origin/challenge/$INPUT_SLUG' already exists, indicating that the challenge has already been created. Please delete the remote branch and try again."
             exit 1
           else
-            echo "Challenge branch does not exist. Proceeding..."
+            echo "Challenge branch does not exist on origin. Proceeding..."
           fi
         env:
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
