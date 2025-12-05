@@ -339,8 +339,8 @@ For these workflows to function properly, your challenge repository should follo
 ```text
 .
 ├── challenges/
-│   ├── <category>/
-│       └── <challenge-slug>
+│   └── <category>/
+│       └── <challenge-slug>/
 ├── pages/
 │   └── <page-slug>/
 ├── template/
