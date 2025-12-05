@@ -9,7 +9,7 @@ This repository provides reusable workflows that automate challenge creation, co
 > This repository uses the [CTF Pilot's Challenge Toolkit](https://github.com/ctfpilot/challenge-toolkit) for challenge management and template rendering.  
 > Please see its documentation for detailed information about challenge structure and schema.
 
-This CI system serves as the backbone for managing challenges in CTF Pilot ecosystem. It provides automated workflows that:
+This CI system serves as the backbone for managing challenges in the CTF Pilot ecosystem. It provides automated workflows that:
 
 - **Create new challenges** with standardized structure and metadata
 - **Configure challenges** by building Docker images and rendering Kubernetes deployment files
