@@ -76,11 +76,14 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      GITHUB_TOKEN:
+        description: "GitHub token to use for authentication"
+        required: false
 
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 jobs:
   create_challenge:
@@ -92,6 +95,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     steps:
       # Checkout repository
       - name: Checkout repository
@@ -263,7 +267,7 @@ jobs:
             --milestone "$INPUT_MILESTONE")
           echo "pr_url=$URL" >> "$GITHUB_OUTPUT"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
           GH_ACTOR: ${{ github.actor }}
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
           INPUT_NAME: ${{ inputs.name }}
@@ -307,7 +311,7 @@ jobs:
             --assignee "$GH_ACTOR" \
             --milestone "$INPUT_MILESTONE"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
           GH_ACTOR: ${{ github.actor }}
           GH_REPO: ${{ github.repository }}
           GH_PR: ${{ needs.create_challenge.outputs.pr }}
