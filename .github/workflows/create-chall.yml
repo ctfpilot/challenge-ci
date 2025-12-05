@@ -204,20 +204,23 @@ jobs:
 
       # Create issue
       - name: Create issue
-        run: >-
-          gh issue create --title "$INPUT_NAME" \
-            --body 'Challenge: $INPUT_NAME by $INPUT_AUTHOR.
+        run: |
+          BODY=$(cat <<EOF
+          Challenge: $INPUT_NAME by $INPUT_AUTHOR.
 
-            - **Flag:** $INPUT_FLAG
-            - **Instanced:** $INPUT_INSTANCED
-            - **Instanced type:** $INPUT_INSTANCED_TYPE
+          - **Flag:** $INPUT_FLAG
+          - **Instanced:** $INPUT_INSTANCED
+          - **Instanced type:** $INPUT_INSTANCED_TYPE
 
-            Challenge branch: [challenge/$INPUT_SLUG](/$GH_REPO/tree/challenge/$INPUT_SLUG)
-            
-            Initial code has been generated in $GH_PR.
+          Challenge branch: [challenge/$INPUT_SLUG](/$GH_REPO/tree/challenge/$INPUT_SLUG)
 
-            Automatic challenge creation was done by the $GH_ACTOR.
-            ' \
+          Initial code has been generated in $GH_PR.
+
+          Automatic challenge creation was done by the $GH_ACTOR.
+          EOF
+          )
+
+          gh issue create --title "$INPUT_NAME" --body "$BODY" \
             --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
             --assignee "$GH_ACTOR" \
             --milestone "$INPUT_MILESTONE"
