@@ -165,6 +165,18 @@ jobs:
         env:
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
 
+      # Check if pr base branch exists
+      - name: Check if PR base branch exists
+        run: |
+          if ! git show-ref --verify --quiet refs/heads/$INPUT_PR_BASE && ! git show-ref --verify --quiet refs/remotes/origin/$INPUT_PR_BASE; then
+            echo "::error title=Base branch does not exist::The specified base branch '$INPUT_PR_BASE' does not exist. Please provide a valid base branch for the pull request."
+            exit 1
+          else
+            echo "Base branch '$INPUT_PR_BASE' exists. Proceeding..."
+          fi
+        env:
+          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
+
       # Commit changes to new branch
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
