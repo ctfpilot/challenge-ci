@@ -305,8 +305,6 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Permissions required**:
 
 - `contents`: write (to commit generated files)
-- `packages`: write (to push Docker images)
-- `id-token`: write (for OIDC authentication)
 
 ## Setup Instructions
 

@@ -10,8 +10,6 @@ jobs:
     uses: ctfpilot/challenge-ci/.github/workflows/render-templates.yml@main
     permissions:
       contents: write
-      packages: write
-      id-token: write
     with:
       runs-on: "ubuntu-latest"
       toolkit-path: "./challenge-toolkit/"
