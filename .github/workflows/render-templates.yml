@@ -47,7 +47,6 @@ jobs:
 
           full_challenges=""
           for category in $(echo "$categories" | tr ',' ' '); do
-            challenges="$(ls "challenges/$category")"
             for challenge in $(ls "challenges/$category"); do
               full_challenges="$full_challenges,$category/$challenge"
             done
