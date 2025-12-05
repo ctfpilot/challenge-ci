@@ -1,0 +1,78 @@
+name: Render all templates
+
+on:
+  workflow_call:
+    inputs:
+      # Workflow settings
+      runs-on:
+        description: "The runner to use for the workflow"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      toolkit-path:
+        description: "Path to the CTF Pilot's Challenge Toolkit"
+        required: false
+        type: string
+        default: "./challenge-toolkit/"
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  render_templates:
+    name: Render all templates
+    runs-on: ${{ inputs.runs-on || github.event.inputs.runs-on || 'ubuntu-latest' }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      # Install python and dependencies
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install python dependencies
+        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+
+      # Generate templates
+      - name: Generate list of challenges
+        id: challenges
+        run: |
+          categories="$(ls challenges)"
+          categories=$(echo "$categories" | tr ' ' ',')
+
+          full_challenges=""
+          for category in $(echo "$categories" | tr ',' ' '); do
+            challenges="$(ls "challenges/$category")"
+            for challenge in $(ls "challenges/$category"); do
+              full_challenges="$full_challenges,$category/$challenge"
+            done
+          done
+
+          for challenge in $(echo "$full_challenges" | tr ',' ' '); do
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template clean "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template k8s "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template configmap "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template handout "$challenge"
+          done
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add and commit changes
+        run: |
+          git add challenges/**
+          git diff --cached --quiet || git commit -m "CI: Update challenges [skip ci]"
+
+      - name: Pull with merge
+        run: |
+          git pull --rebase --no-edit origin "$REF_NAME"
+          git push origin "$REF_NAME"
+        env:
+          REF_NAME: ${{ github.ref_name }}
