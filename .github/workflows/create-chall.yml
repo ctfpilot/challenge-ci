@@ -50,6 +50,11 @@ on:
         type: number
         default: 1000
       # Github settings
+      pr-base:
+        description: "Base branch for the pull request"
+        required: false
+        type: string
+        default: "develop"
       milestone:
         description: "Milestone to assign the issue and PR to"
         required: false
@@ -145,7 +150,7 @@ jobs:
         if: ${{ inputs.issue == 0 }}
         id: pr
         run: >-
-          URL=$(gh pr create -B develop -H "challenge/$INPUT_SLUG" \
+          URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
             --title "Create challenge: $INPUT_NAME" \
             --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated." \
             --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
@@ -160,12 +165,13 @@ jobs:
           INPUT_AUTHOR: ${{ inputs.author }}
           INPUT_CATEGORY: ${{ inputs.category }}
           INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
           INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
 
       - name: Open pull request on existing issue
         if: ${{ inputs.issue != 0 }}
         run: >-
-          URL=$(gh pr create -B develop -H "challenge/$INPUT_SLUG" \
+          URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
             --title "Create challenge: $INPUT_NAME" \
             --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated. This is the initial code for issue #$INPUT_ISSUE" \
             --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
@@ -180,6 +186,7 @@ jobs:
           INPUT_AUTHOR: ${{ inputs.author }}
           INPUT_CATEGORY: ${{ inputs.category }}
           INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
           INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
           INPUT_ISSUE: ${{ inputs.issue }}
 

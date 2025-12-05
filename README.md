@@ -123,6 +123,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 - `instanced_type`: Type for instanced challenges (`web`, `tcp`, `none`; default: `none`)
 - `min-points`: Minimum points (default: `10`)
 - `points`: Maximum points (default: `1000`)
+- `pr-base`: Base branch for PR (default: `develop`)
 - `milestone`: GitHub milestone (default: `Challenges`)
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
 - `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
