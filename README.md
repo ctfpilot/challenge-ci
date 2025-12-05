@@ -43,6 +43,7 @@ Creates a new challenge with all necessary scaffolding and metadata. This workfl
 - Creates a new branch and pull request
 - Creates or links to an associated GitHub issue
 - Creates GitHub labels for the challenge
+- Creates GitHub milestone if it doesn't exist
 
 **When to use**: When setting up a new challenge.
 
