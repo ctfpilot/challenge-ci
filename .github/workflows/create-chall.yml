@@ -120,7 +120,7 @@ jobs:
           INPUT_TYPE: ${{ github.event.inputs.type }}
           INPUT_INSTANCED_TYPE: ${{ github.event.inputs.instanced_type }}
           INPUT_POINTS: ${{ github.event.inputs.points || 1000 }}
-          INPUT_MIN_POINTS: ${{ github.event.inputs.min_points || 10 }}
+          INPUT_MIN_POINTS: ${{ github.event.inputs.min-points || 10 }}
           INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
 
       # Get slug
