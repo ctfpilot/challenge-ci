@@ -119,6 +119,7 @@ jobs:
 
   # Matrix strategy to run the docker build and push and template rendering for each challenge
   ci:
+    if: ${{ needs.get_challs.outputs.challenges != '[]' && needs.get_challs.outputs.changes && needs.get_challs.outputs.changes != '[]' }}
     strategy:
       fail-fast: false
       matrix:

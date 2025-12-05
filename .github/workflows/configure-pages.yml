@@ -88,6 +88,7 @@ jobs:
 
   # Matrix strategy to run the template rendering for each page
   ci:
+    if: ${{ needs.get_pages.outputs.pages != '[]' && needs.get_pages.outputs.changes && needs.get_pages.outputs.changes != '[]' }}
     strategy:
       matrix:
         page: ${{ fromJson(needs.get_pages.outputs.changes) }}
