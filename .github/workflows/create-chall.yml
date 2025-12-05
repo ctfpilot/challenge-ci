@@ -142,7 +142,7 @@ jobs:
       # Get slug
       - name: Get slug
         id: slugify
-        run: echo "slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify --name "$INPUT_NAME")" >> "$GITHUB_OUTPUT"
+        run: echo "slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify "$INPUT_NAME")" >> "$GITHUB_OUTPUT"
         env:
           INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_NAME: ${{ inputs.name }}
@@ -244,7 +244,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          
+
       - name: Ensure submodules are fetched
         if: ${{ inputs.fetch-submodules == true }}
         run: git submodule update --init --recursive
