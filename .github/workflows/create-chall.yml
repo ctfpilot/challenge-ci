@@ -272,16 +272,6 @@ jobs:
       issues: write
       contents: read
     steps:
-      # Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Ensure submodules are fetched
-        if: ${{ inputs.fetch-submodules == true }}
-        run: git submodule update --init --recursive
-
       # Create issue
       - name: Create issue
         run: |
