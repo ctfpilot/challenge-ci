@@ -54,7 +54,7 @@ on:
           - "instanced"
         type: choice
       instanced_type:
-        description: "Type of the instanced"
+        description: "Type of the instanced challenge"
         required: false
         type: choice
         default: "none"
