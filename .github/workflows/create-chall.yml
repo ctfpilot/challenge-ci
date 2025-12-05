@@ -225,7 +225,7 @@ jobs:
           INPUT_MILESTONE: ${{ github.event.inputs.milestone || 'Challenges' }}
           INPUT_AUTHOR: ${{ github.event.inputs.author }}
           INPUT_FLAG: ${{ github.event.inputs.flag }}
-          INPUT_INSTANCED: ${{ github.event.inputs.instanced }}
+          INPUT_INSTANCED: ${{ github.event.inputs.type == 'instanced' && 'Yes' || 'No' }}
           INPUT_INSTANCED_TYPE: ${{ github.event.inputs.instanced_type }}
           INPUT_CATEGORY: ${{ github.event.inputs.category }}
           INPUT_DIFFICULTY: ${{ github.event.inputs.difficulty }}
