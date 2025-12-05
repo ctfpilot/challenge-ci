@@ -264,16 +264,48 @@ jobs:
             }
 
             const { data: pr } = await github.rest.pulls.create({
+              maintainer_can_modify: true,
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Create challenge: ${process.env.INPUT_NAME}`,
               head: `challenge/${process.env.INPUT_SLUG}`,
               base: process.env.INPUT_PR_BASE || 'develop',
               body: `Create challenge: ${process.env.INPUT_NAME} by ${process.env.INPUT_AUTHOR}. This PR was automatically generated.${issueText}`,
-              labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
-              assignees: [context.actor],
-              milestone: process.env.INPUT_MILESTONE || 'Challenges',
             });
+
+            
+            # labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
+            # assignees: [context.actor],
+            # milestone: process.env.INPUT_MILESTONE || 'Challenges',
+
+            # Set labels, assignees, and milestone through separate API calls
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
+            });
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              assignees: [context.actor],
+            });
+            const milestones = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+            });
+            const milestone = milestones.data.find(m => m.title === (process.env.INPUT_MILESTONE || 'Challenges'));
+            if (milestone) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                milestone: milestone.number,
+              });
+            }
+
             core.setOutput('pr_url', pr.html_url);
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
