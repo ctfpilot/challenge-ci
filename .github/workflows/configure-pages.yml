@@ -99,7 +99,7 @@ jobs:
       # Template rendering
       # -----------------------------------
 
-      - name: Render challenge template
+      - name: Render page template
         id: render
         run: |
           python3 "$INPUT_TOOLKIT"/src/ctf.py page "$INPUT_PAGE"
