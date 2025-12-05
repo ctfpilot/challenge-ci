@@ -132,6 +132,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 - `milestone`: GitHub milestone (default: `Challenges`)
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
 - `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
 
@@ -191,6 +192,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
 - `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
 
@@ -246,6 +248,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
 - `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
 
@@ -297,6 +300,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
 - `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
 
@@ -356,6 +360,7 @@ All workflows support customization through inputs:
 
 - **`runs-on`**: Specify different GitHub Actions runners (e.g., `ubuntu-latest`, self-hosted runner)
 - **`toolkit-path`**: Adjust if your Challenge Toolkit is in a non-standard location
+- **`fetch-submodules`**: Specify if submodules should be fetched (default: `true`)
 
 For more advanced customization, fork this repository and modify the workflows as needed, then reference your fork in your challenge repository workflows.
 
