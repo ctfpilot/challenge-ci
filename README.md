@@ -350,7 +350,7 @@ See the [contributing](#contributing) section below for more information.
 
 If `configure-challs.yml` fails during Docker builds:
 
-- Verify your Dockerfile is valid, that is is in the challenge directory, and that it is correctly configures in the `challenge.yaml`
+- Verify your Dockerfile is valid, that it is in the challenge directory, and that it is correctly configured in the `challenge.yaml`
 - Check for missing dependencies or incorrect base images
 - Review GitHub Actions logs for specific error messages
 
@@ -359,7 +359,7 @@ If `configure-challs.yml` fails during Docker builds:
 If template rendering fails:
 
 - Verify your `challenge.yaml` or `page.yaml` matches the schema
-- Check that deployment templates exist in the `template/` challenge
+- Check that deployment templates exist in the `template/` directory
 - Review the [Challenge Toolkit documentation](https://github.com/ctfpilot/challenge-toolkit) for template requirements
 - Review GitHub Actions logs for specific error messages
 
