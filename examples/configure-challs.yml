@@ -9,7 +9,8 @@ on:
 jobs:
   create_challenge:
     name: Create challenge
-    uses: ctfpilot/challenge-ci/.github/workflows/configure-challs.yml@v1.0.0
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    uses: ctfpilot/challenge-ci/.github/workflows/configure-challs.yml@main
     permissions:
       contents: write
       packages: write

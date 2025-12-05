@@ -63,6 +63,7 @@ on:
           - "tcp"
           - "none"
       flag:
+        # replace `FLAG` with your flag prefix
         description: "Flag of the challenge. Format: FLAG{.*}, dynamic or null"
         required: true
         type: string
@@ -80,7 +81,8 @@ on:
 jobs:
   create_challenge:
     name: Create challenge
-    uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@v1.0.0
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@main
     permissions:
       contents: write
       pull-requests: write
