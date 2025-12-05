@@ -99,6 +99,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
         env:
@@ -138,6 +139,18 @@ jobs:
           INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_NAME: ${{ inputs.name }}
 
+      # Check if challenge branch already exists
+      - name: Check if challenge branch exists
+        run: |
+          if git show-ref --verify --quiet refs/heads/challenge/$INPUT_SLUG; then
+            echo "::error title=Challenge already exists::The challenge branch 'challenge/$INPUT_SLUG' already exists, indicating that the challenge has already been created. Please delete the branch and try again."
+            exit 1
+          else
+            echo "Challenge branch does not exist. Proceeding..."
+          fi
+        env:
+          INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
+
       # Commit changes to new branch
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -151,7 +164,7 @@ jobs:
         run: >-
           ISSUE_TEXT=""
           if [ $INPUT_ISSUE != 0 ]; then
-            ISSUE_TEXT=" This is the initial code for issue #${{ inputs.issue }}."
+            ISSUE_TEXT=" This is the initial code for issue #$INPUT_ISSUE."
           fi
 
           URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
