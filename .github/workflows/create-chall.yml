@@ -76,10 +76,6 @@ on:
         required: false
         type: boolean
         default: true
-    secrets:
-      GH_TOKEN:
-        description: "GitHub token to use for authentication"
-        required: false
 
 permissions:
   contents: write
@@ -302,7 +298,7 @@ jobs:
 
             core.setOutput('pr_url', pr.html_url);
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
           GH_ACTOR: ${{ github.actor }}
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
           INPUT_NAME: ${{ inputs.name }}
@@ -346,7 +342,7 @@ jobs:
             --assignee "$GH_ACTOR" \
             --milestone "$INPUT_MILESTONE"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
           GH_ACTOR: ${{ github.actor }}
           GH_REPO: ${{ github.repository }}
           GH_PR: ${{ needs.create_challenge.outputs.pr }}
