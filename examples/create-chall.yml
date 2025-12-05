@@ -50,7 +50,7 @@ on:
         required: true
         options:
           - "static"
-          - "online"
+          - "shared"
           - "instanced"
         type: choice
       instanced_type:
