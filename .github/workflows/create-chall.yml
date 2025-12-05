@@ -77,7 +77,7 @@ on:
         type: boolean
         default: true
     secrets:
-      GITHUB_TOKEN:
+      GH_TOKEN:
         description: "GitHub token to use for authentication"
         required: false
 
@@ -267,7 +267,7 @@ jobs:
             --milestone "$INPUT_MILESTONE")
           echo "pr_url=$URL" >> "$GITHUB_OUTPUT"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           GH_ACTOR: ${{ github.actor }}
           INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
           INPUT_NAME: ${{ inputs.name }}
