@@ -96,6 +96,8 @@ jobs:
           python-version: "3.x"
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
 
       # Create challenge
       - name: Create challenge
@@ -128,6 +130,7 @@ jobs:
         id: slugify
         run: echo "slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify --name "$INPUT_NAME")" >> "$GITHUB_OUTPUT"
         env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_NAME: ${{ github.event.inputs.name }}
 
       # Commit changes to new branch
