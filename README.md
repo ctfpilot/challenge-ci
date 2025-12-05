@@ -103,7 +103,10 @@ jobs:
 See the full example in [`examples/create-chall.yml`](examples/create-chall.yml).  
 Place the workflow in your challenge repository's `.github/workflows/` directory.
 
-*We recommend changing `@main` to a specific version tag (e.g., `@v1.0.0`).*
+> [!IMPORTANT]
+> To prevent supply chain attacks, please always pin the version of the workflow you are using.  
+> Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
+> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Required inputs**:
 
@@ -173,7 +176,10 @@ jobs:
 See the full example in [`examples/configure-challs.yml`](examples/configure-challs.yml).  
 Place the workflow in your challenge repository's `.github/workflows/` directory.
 
-*We recommend changing `@main` to a specific version tag (e.g., `@v1.0.0`).*
+> [!IMPORTANT]
+> To prevent supply chain attacks, please always pin the version of the workflow you are using.  
+> Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
+> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -225,7 +231,10 @@ jobs:
 See the full example in [`examples/configure-pages.yml`](examples/configure-pages.yml).  
 Place the workflow in your challenge repository's `.github/workflows/` directory.
 
-*We recommend changing `@main` to a specific version tag (e.g., `@v1.0.0`).*
+> [!IMPORTANT]
+> To prevent supply chain attacks, please always pin the version of the workflow you are using.  
+> Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
+> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -273,7 +282,10 @@ jobs:
 See the full example in [`examples/render-templates.yml`](examples/render-templates.yml).  
 Place the workflow in your challenge repository's `.github/workflows/` directory.
 
-*We recommend changing `@main` to a specific version tag (e.g., `@v1.0.0`).*
+> [!IMPORTANT]
+> To prevent supply chain attacks, please always pin the version of the workflow you are using.  
+> Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
+> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
