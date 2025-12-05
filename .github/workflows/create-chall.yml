@@ -147,33 +147,16 @@ jobs:
 
       # Open pull request
       - name: Open pull request
-        if: ${{ inputs.issue == 0 }}
         id: pr
         run: >-
-          URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
-            --title "Create challenge: $INPUT_NAME" \
-            --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated." \
-            --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
-            --assignee "$GH_ACTOR" \
-            --milestone "$INPUT_MILESTONE")
-          echo "pr_url=$URL" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_ACTOR: ${{ github.actor }}
-          INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
-          INPUT_NAME: ${{ inputs.name }}
-          INPUT_AUTHOR: ${{ inputs.author }}
-          INPUT_CATEGORY: ${{ inputs.category }}
-          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
-          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
-          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+          ISSUE_TEXT=""
+          if [ $INPUT_ISSUE != 0 ]; then
+            ISSUE_TEXT=" This is the initial code for issue #${{ inputs.issue }}."
+          fi
 
-      - name: Open pull request on existing issue
-        if: ${{ inputs.issue != 0 }}
-        run: >-
           URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
             --title "Create challenge: $INPUT_NAME" \
-            --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated. This is the initial code for issue #$INPUT_ISSUE" \
+            --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated.$ISSUE_TEXT" \
             --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
             --assignee "$GH_ACTOR" \
             --milestone "$INPUT_MILESTONE")
