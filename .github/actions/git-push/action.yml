@@ -18,8 +18,8 @@ runs:
         attempt=1
         while [ $attempt -le $tries ]; do
           echo "Attempt $attempt: fetch+rebase"
-          git fetch origin "$BRANCH" || true
-          git pull --rebase --no-edit origin "$BRANCH" || true
+          git fetch origin "$BRANCH"
+          git pull --rebase --no-edit origin "$BRANCH"
 
           echo "Attempt $attempt: push"
           if git push origin "$BRANCH"; then
