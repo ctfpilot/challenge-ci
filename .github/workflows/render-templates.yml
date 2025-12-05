@@ -64,6 +64,8 @@ jobs:
             done
           done
 
+          full_challenges=$(echo "$full_challenges" | cut -c 2-)
+
           for challenge in $(echo "$full_challenges" | tr ',' ' '); do
             python3 "$INPUT_TOOLKIT"/src/ctf.py template clean "$challenge"
             python3 "$INPUT_TOOLKIT"/src/ctf.py template k8s "$challenge"
