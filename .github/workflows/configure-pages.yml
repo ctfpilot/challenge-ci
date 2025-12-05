@@ -82,6 +82,8 @@ jobs:
           python-version: "3.x"
       - name: Install python dependencies
         run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
 
       # -----------------------------------
       # Template rendering
@@ -90,7 +92,10 @@ jobs:
       - name: Render challenge template
         id: render
         run: |
-          python3 "$INPUT_TOOLKIT"/src/ctf.py page ${{ matrix.page }}
+          python3 "$INPUT_TOOLKIT"/src/ctf.py page "$INPUT_PAGE"
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || github.event.inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_PAGE: ${{ matrix.page }}
 
       # -----------------------------------
       # Upload
