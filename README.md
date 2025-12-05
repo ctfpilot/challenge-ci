@@ -90,6 +90,10 @@ jobs:
   create:
     # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
     uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     with:
       name: ${{ inputs.name }}
       author: ${{ inputs.author }}
