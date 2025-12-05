@@ -20,10 +20,6 @@ on:
         type: boolean
         default: true
 
-env:
-  GHCR_REGISTRY: ghcr.io
-  GITHUB_REPOSITORY: ${{ github.repository }}
-
 permissions:
   contents: write
 
