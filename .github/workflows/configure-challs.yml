@@ -39,8 +39,13 @@ jobs:
         id: get-categories
         # Get all directories in the challenges directory and output them as comma separated string
         run: |
-          categories="$(ls challenges)"
-          categories=$(echo "$categories" | tr ' ' ',')
+          if [ -d "challenges" ] && [ "$(ls -A challenges)" ]; then
+            categories=$(echo "$(ls challenges)" | tr ' ' ',')
+          else
+            echo "Warning: 'challenges' directory does not exist or is empty."
+            echo "::notice title=No challenges found::The 'challenges' directory is missing or empty. No challenges to process."
+            categories=""
+          fi
           echo "categories=$categories" >> $GITHUB_OUTPUT
       - name: Print categories
         run: echo "$INPUT_CATEGORIES"
@@ -50,12 +55,25 @@ jobs:
         id: get-challenges
         run: |
           categories=$(echo "$INPUT_CATEGORIES")
+          if [ -z "$categories" ]; then
+            echo "challenges=[]" >> $GITHUB_OUTPUT
+            echo "No categories found, skipping challenge retrieval."
+            echo "::debug::No categories found, exiting."
+            exit 0
+          fi
 
           # For each challenge, get all directories in the category directory and 
           # add it to comma separated string with the category name and challenge name
           full_challenges=""
 
           for category in $(echo "$categories" | tr ',' ' '); do
+            category_path="challenges/$category"
+            if [ ! -d "$category_path" ] || [ -z "$(ls -A "$category_path")" ]; then
+              echo "Warning: Category directory '$category_path' does not exist or is empty."
+              echo "::notice title=No challenges found in category::$category The category directory is missing or empty. No challenges to process in this category."
+              continue
+            fi
+
             for challenge in $(ls "challenges/$category"); do
               full_challenges="$full_challenges,$category/$challenge"
             done
@@ -163,33 +181,9 @@ jobs:
           git diff --cached --quiet || git commit -m "CI: Update challenges [skip ci]"
 
       - name: Push changes
+        uses: ./.github/workflows/git-push.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          BRANCH="$REF_NAME"
-
-          # Try a few times to avoid race conditions when multiple runs push concurrently.
-          tries=10
-          attempt=1
-          while [ $attempt -le $tries ]; do
-            echo "Attempt $attempt: fetch+rebase"
-            git fetch origin "$BRANCH" || true
-            git pull --rebase --no-edit origin "$BRANCH" || true
-
-            echo "Attempt $attempt: push"
-            if git push origin "$BRANCH"; then
-              echo "Push succeeded on attempt $attempt"
-              break
-            fi
-
-            echo "Push failed on attempt $attempt, retrying after backoff"
-            sleep $((attempt * 2))
-            attempt=$((attempt + 1))
-          done
-
-          if [ $attempt -gt $tries ]; then
-            echo "Failed to push after $tries attempts"
-            exit 1
-          fi
+        with:
+          runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}

@@ -72,33 +72,9 @@ jobs:
           git diff --cached --quiet || git commit -m "CI: Update challenges [skip ci]"
 
       - name: Push changes
+        uses: ./.github/workflows/git-push.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          BRANCH="$REF_NAME"
-
-          # Try a few times to avoid race conditions when multiple runs push concurrently.
-          tries=10
-          attempt=1
-          while [ $attempt -le $tries ]; do
-            echo "Attempt $attempt: fetch+rebase"
-            git fetch origin "$BRANCH" || true
-            git pull --rebase --no-edit origin "$BRANCH" || true
-
-            echo "Attempt $attempt: push"
-            if git push origin "$BRANCH"; then
-              echo "Push succeeded on attempt $attempt"
-              break
-            fi
-
-            echo "Push failed on attempt $attempt, retrying after backoff"
-            sleep $((attempt * 2))
-            attempt=$((attempt + 1))
-          done
-
-          if [ $attempt -gt $tries ]; then
-            echo "Failed to push after $tries attempts"
-            exit 1
-          fi
+        with:
+          runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}

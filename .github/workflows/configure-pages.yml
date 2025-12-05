@@ -36,10 +36,14 @@ jobs:
         id: get-pages
         # Get all directories in the pages directory and output them as comma separated string
         run: |
-          pages=$(ls pages)
-          pages=$(echo "$pages" | tr ' ' ',')
+          if [ -d "pages" ] && [ "$(ls -A pages)" ]; then
+            pages=$(echo "$(ls pages)" | tr ' ' ',')
+          else
+            echo "Warning: 'pages' directory does not exist or is empty."
+            echo "::notice title=No pages found::The 'pages' directory is missing or empty. No pages to process."
+            pages=""
+          fi
           echo "pages=$pages" >> $GITHUB_OUTPUT
-
       - name: Print pages
         run: echo "$INPUT_PAGES"
         env:
@@ -48,6 +52,12 @@ jobs:
       - name: Generate paths filter for pages
         run: |
           pages=$(echo "$INPUT_PAGES")
+          if [ -z "$pages" ]; then
+            echo "No pages found, skipping page retrieval."
+            echo "::debug::No pages found, exiting."
+            exit 0
+          fi
+
           echo "Generating paths filter for pages..."
           for page in $(echo "$pages" | tr ',' ' '); do
             echo "$page:" >> paths-filter.yml
@@ -112,33 +122,9 @@ jobs:
           git diff --cached --quiet || git commit -m "CI: Update pages [skip ci]"
 
       - name: Push changes
+        uses: ./.github/workflows/git-push.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          BRANCH="$REF_NAME"
-
-          # Try a few times to avoid race conditions when multiple runs push concurrently.
-          tries=10
-          attempt=1
-          while [ $attempt -le $tries ]; do
-            echo "Attempt $attempt: fetch+rebase"
-            git fetch origin "$BRANCH" || true
-            git pull --rebase --no-edit origin "$BRANCH" || true
-
-            echo "Attempt $attempt: push"
-            if git push origin "$BRANCH"; then
-              echo "Push succeeded on attempt $attempt"
-              break
-            fi
-
-            echo "Push failed on attempt $attempt, retrying after backoff"
-            sleep $((attempt * 2))
-            attempt=$((attempt + 1))
-          done
-
-          if [ $attempt -gt $tries ]; then
-            echo "Failed to push after $tries attempts"
-            exit 1
-          fi
+        with:
+          runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
