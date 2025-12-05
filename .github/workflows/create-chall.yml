@@ -152,6 +152,10 @@ jobs:
       # Check if challenge branch already exists
       - name: Check if challenge branch exists
         run: |
+          # Fetch all branches
+          git fetch origin
+
+          # Check if the branch exists
           if git show-ref --verify --quiet refs/heads/challenge/$INPUT_SLUG; then
             echo "::error title=Challenge already exists::The challenge branch 'challenge/$INPUT_SLUG' already exists, indicating that the challenge has already been created. Please delete the branch and try again."
             exit 1
