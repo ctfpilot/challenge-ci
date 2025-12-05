@@ -254,19 +254,27 @@ jobs:
       # Open pull request
       - name: Open pull request
         id: pr
-        run: |
-          ISSUE_TEXT=""
-          if [ "$INPUT_ISSUE" != "0" ]; then
-            ISSUE_TEXT=" This is the initial code for issue #$INPUT_ISSUE."
-          fi
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let issueText = ""
+            if (process.env.INPUT_ISSUE !== "0") {
+              issueText = ` This is the initial code for issue #${process.env.INPUT_ISSUE}.`;
+            }
 
-          URL=$(gh pr create -B "$INPUT_PR_BASE" -H "challenge/$INPUT_SLUG" \
-            --title "Create challenge: $INPUT_NAME" \
-            --body "Create challenge: $INPUT_NAME by $INPUT_AUTHOR. This PR was automatically generated.$ISSUE_TEXT" \
-            --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
-            --assignee "$GH_ACTOR" \
-            --milestone "$INPUT_MILESTONE")
-          echo "pr_url=$URL" >> "$GITHUB_OUTPUT"
+            const { data: pr } = await github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Create challenge: ${process.env.INPUT_NAME}`,
+              head: `challenge/${process.env.INPUT_SLUG}`,
+              base: process.env.INPUT_PR_BASE || 'develop',
+              body: `Create challenge: ${process.env.INPUT_NAME} by ${process.env.INPUT_AUTHOR}. This PR was automatically generated.${issueText}`,
+              labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
+              assignees: [context.actor],
+              milestone: process.env.INPUT_MILESTONE || 'Challenges',
+            });
+            core.setOutput('pr_url', pr.html_url);
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           GH_ACTOR: ${{ github.actor }}
