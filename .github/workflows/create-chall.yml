@@ -273,12 +273,6 @@ jobs:
               body: `Create challenge: ${process.env.INPUT_NAME} by ${process.env.INPUT_AUTHOR}. This PR was automatically generated.${issueText}`,
             });
 
-            
-            # labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
-            # assignees: [context.actor],
-            # milestone: process.env.INPUT_MILESTONE || 'Challenges',
-
-            # Set labels, assignees, and milestone through separate API calls
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
