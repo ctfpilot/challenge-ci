@@ -230,7 +230,7 @@ jobs:
           INPUT_ISSUE: ${{ inputs.issue }}
 
   create_issue:
-    if: ${{ inputs.issue == 0 }}
+    if: ${{ inputs.issue == '0' }}
     name: Create issue
     runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     needs:
