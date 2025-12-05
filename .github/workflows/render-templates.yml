@@ -1,0 +1,95 @@
+name: Render all templates
+
+on:
+  workflow_call:
+    inputs:
+      # Workflow settings
+      runs-on:
+        description: "The runner to use for the workflow"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      toolkit-path:
+        description: "Path to the CTF Pilot's Challenge Toolkit"
+        required: false
+        type: string
+        default: "./challenge-toolkit/"
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  render_templates:
+    name: Render all templates
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      # Install python and dependencies
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install python dependencies
+        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      # Generate templates
+      - name: Generate list of challenges
+        id: challenges
+        run: |
+          if [ -d "challenges" ] && [ "$(ls -A challenges)" ]; then
+            categories=$(echo "$(ls challenges)" | tr ' ' ',')
+          else
+            echo "Warning: 'challenges' directory does not exist or is empty."
+            echo "::notice title=No challenges found::The 'challenges' directory is missing or empty. No challenges to process."
+            exit 0
+          fi
+
+          full_challenges=""
+          for category in $(echo "$categories" | tr ',' ' '); do
+            category_path="challenges/$category"
+            if [ ! -d "$category_path" ] || [ -z "$(ls -A "$category_path")" ]; then
+              echo "Warning: Category directory '$category_path' does not exist or is empty."
+              echo "::notice title=No challenges found in category::$category The category directory is missing or empty. No challenges to process in this category."
+              continue
+            fi
+
+            for challenge in $(ls "$category_path"); do
+              full_challenges="$full_challenges,$category/$challenge"
+            done
+          done
+
+          if [ -n "$full_challenges" ]; then
+            full_challenges=$(echo "$full_challenges" | cut -c 2-)
+          fi
+
+          for challenge in $(echo "$full_challenges" | tr ',' ' '); do
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template clean "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template k8s "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template configmap "$challenge"
+            python3 "$INPUT_TOOLKIT"/src/ctf.py template handout "$challenge"
+          done
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add and commit changes
+        run: |
+          git add challenges/**
+          git diff --cached --quiet || git commit -m "CI: Update challenges [skip ci]"
+
+      - name: Push changes
+        uses: ./.github/actions/git-push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          ref-name: ${{ github.ref_name }}

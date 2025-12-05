@@ -1,0 +1,40 @@
+name: Git Push
+description: "Push changes to the repository with retry logic to handle concurrent updates."
+inputs:
+  ref-name:
+    description: "The name of the branch or ref to push to."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        BRANCH="$REF_NAME"
+
+        # Try a few times to avoid race conditions when multiple runs push concurrently.
+        tries=10
+        attempt=1
+        while [ $attempt -le $tries ]; do
+          echo "Attempt $attempt: fetch+rebase"
+          git fetch origin "$BRANCH"
+          git pull --rebase --no-edit origin "$BRANCH"
+
+          echo "Attempt $attempt: push"
+          if git push origin "$BRANCH"; then
+            echo "Push succeeded on attempt $attempt"
+            break
+          fi
+
+          echo "Push failed on attempt $attempt, retrying after backoff"
+          sleep $((attempt * 2))
+          attempt=$((attempt + 1))
+        done
+
+        if [ $attempt -gt $tries ]; then
+          echo "Failed to push after $tries attempts"
+          exit 1
+        fi
+      env:
+        REF_NAME: ${{ inputs.ref-name }}

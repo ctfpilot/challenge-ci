@@ -1,0 +1,190 @@
+name: Configure challs
+
+on:
+  workflow_call:
+    inputs:
+      # Workflow settings
+      runs-on:
+        description: "The runner to use for the workflow"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      toolkit-path:
+        description: "Path to the CTF Pilot's Challenge Toolkit"
+        required: false
+        type: string
+        default: "./challenge-toolkit/"
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  GITHUB_REPOSITORY: ${{ github.repository }}
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  get_challs:
+    name: Get challs
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    outputs:
+      categories: ${{ steps.get-categories.outputs.categories }}
+      challenges: ${{ steps.get-challenges.outputs.challenges }}
+      changes: ${{ steps.check-changes.outputs.changes }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Get categories
+        id: get-categories
+        # Get all directories in the challenges directory and output them as comma separated string
+        run: |
+          if [ -d "challenges" ] && [ "$(ls -A challenges)" ]; then
+            categories=$(echo "$(ls challenges)" | tr ' ' ',')
+          else
+            echo "Warning: 'challenges' directory does not exist or is empty."
+            echo "::notice title=No challenges found::The 'challenges' directory is missing or empty. No challenges to process."
+            categories=""
+          fi
+          echo "categories=$categories" >> $GITHUB_OUTPUT
+      - name: Print categories
+        run: echo "$INPUT_CATEGORIES"
+        env:
+          INPUT_CATEGORIES: ${{ steps.get-categories.outputs.categories }}
+      - name: Get challenges in each category
+        id: get-challenges
+        run: |
+          categories=$(echo "$INPUT_CATEGORIES")
+          if [ -z "$categories" ]; then
+            echo "challenges=[]" >> $GITHUB_OUTPUT
+            echo "No categories found, skipping challenge retrieval."
+            echo "::debug::No categories found, exiting."
+            exit 0
+          fi
+
+          # For each challenge, get all directories in the category directory and 
+          # add it to comma separated string with the category name and challenge name
+          full_challenges=""
+
+          for category in $(echo "$categories" | tr ',' ' '); do
+            category_path="challenges/$category"
+            if [ ! -d "$category_path" ] || [ -z "$(ls -A "$category_path")" ]; then
+              echo "Warning: Category directory '$category_path' does not exist or is empty."
+              echo "::notice title=No challenges found in category::$category The category directory is missing or empty. No challenges to process in this category."
+              continue
+            fi
+
+            for challenge in $(ls "$category_path"); do
+              full_challenges="$full_challenges,$category/$challenge"
+            done
+          done
+
+          if [ -n "$full_challenges" ]; then
+            full_challenges=$(echo "$full_challenges" | cut -c 2-)
+          fi
+
+          # Convert to json array
+          full_challenges=$(echo "$full_challenges" | jq -R 'split(",")')
+          challenges=$(echo "$full_challenges" | tr -d '\n')
+          echo "challenges=$challenges" >> $GITHUB_OUTPUT
+
+          echo "Found challenges: $challenges"
+
+          # Generate paths filter yml
+          # for each challenge, add a line to the yml as root, with the directory listed in list
+          for challenge in $(echo "$challenges" | jq -r '.[]'); do
+            echo "$challenge:" >> paths-filter.yml
+            echo "  - challenges/$challenge/**" >> paths-filter.yml
+          done
+        env:
+          INPUT_CATEGORIES: ${{ steps.get-categories.outputs.categories }}
+
+      - name: Check if this update contains changes in this challenge
+        id: check-changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: paths-filter.yml
+          base: ${{ github.event.pull_request.base.ref || github.ref_name }}
+
+  # Matrix strategy to run the docker build and push and template rendering for each challenge
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        challenge: ${{ fromJson(needs.get_challs.outputs.changes) }}
+    name: Docker and template rendering
+    needs:
+      - get_challs
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------
+      # Docker build and push
+      # -----------------------------------
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install python dependencies
+        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      - name: Build and push Docker image
+        run: |
+          python3 "$INPUT_TOOLKIT"/src/ctf.py pipeline "$INPUT_CHALLENGE" "$GHCR_REGISTRY" "$GITHUB_REPOSITORY"
+        env:
+          GHCR_REGISTRY: ${{ env.GHCR_REGISTRY }}
+          GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_CHALLENGE: ${{ matrix.challenge }}
+
+      # -----------------------------------
+      # Template rendering
+      # -----------------------------------
+
+      - name: Render challenge template
+        id: render
+        run: |
+          python3 "$INPUT_TOOLKIT"/src/ctf.py template clean "$INPUT_CHALLENGE"
+          python3 "$INPUT_TOOLKIT"/src/ctf.py template k8s "$INPUT_CHALLENGE"
+          python3 "$INPUT_TOOLKIT"/src/ctf.py template configmap "$INPUT_CHALLENGE"
+          python3 "$INPUT_TOOLKIT"/src/ctf.py template handout "$INPUT_CHALLENGE"
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_CHALLENGE: ${{ matrix.challenge }}
+
+      # -----------------------------------
+      # Upload
+      # -----------------------------------
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add and commit changes
+        run: |
+          git add challenges/**
+          git diff --cached --quiet || git commit -m "CI: Update challenges [skip ci]"
+
+      - name: Push changes
+        uses: ./.github/actions/git-push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          ref-name: ${{ github.ref_name }}
