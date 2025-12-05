@@ -110,6 +110,7 @@ jobs:
           INPUT_CATEGORIES: ${{ steps.get-categories.outputs.categories }}
 
       - name: Check if this update contains changes in this challenge
+        if: ${{ steps.get-challenges.outputs.challenges != '[]' }}
         id: check-changes
         uses: dorny/paths-filter@v3
         with:
