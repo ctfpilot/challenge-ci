@@ -71,6 +71,11 @@ on:
         required: false
         type: string
         default: "./challenge-toolkit/"
+      fetch-submodules:
+        description: "Whether to fetch git submodules"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -93,6 +98,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+      - name: Ensure submodules are fetched
+        if: ${{ inputs.fetch-submodules == true }}
+        run: git submodule update --init --recursive
 
       # Install python and dependencies
       - name: Install python
@@ -236,6 +244,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          
+      - name: Ensure submodules are fetched
+        if: ${{ inputs.fetch-submodules == true }}
+        run: git submodule update --init --recursive
 
       # Create issue
       - name: Create issue
