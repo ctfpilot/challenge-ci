@@ -1,0 +1,101 @@
+name: Create challenge
+run-name: Create challenge ${{ github.event.inputs.name }} by ${{ github.event.inputs.author }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Existing issue to link the challenge to. Leave empty to create a new issue."
+        required: false
+        type: number
+        default: 0
+      name:
+        description: "Name of the challenge"
+        required: true
+        type: string
+      author:
+        description: "Author of the challenge - Your alias"
+        required: true
+        type: string
+      category:
+        description: "Category of the challenge"
+        required: true
+        options:
+          - "web"
+          - "forensics"
+          - "rev"
+          - "crypto"
+          - "pwn"
+          - "boot2root"
+          - "osint"
+          - "misc"
+          - "blockchain"
+          - "beginner"
+          - "mobile"
+          - "web-intro"
+        type: choice
+      difficulty:
+        description: "Difficulty of the challenge"
+        required: true
+        options:
+          - "beginner"
+          - "easy"
+          - "medium"
+          - "hard"
+          - "very-hard"
+          - "insane"
+        type: choice
+      type:
+        description: "Type of the challenge"
+        required: true
+        options:
+          - "static"
+          - "online"
+          - "instanced"
+        type: choice
+      instanced_type:
+        description: "Type of the instanced"
+        required: false
+        type: choice
+        default: "none"
+        options:
+          - "web"
+          - "tcp"
+          - "none"
+      flag:
+        description: "Flag of the challenge. Format: FLAG{.*}, dynamic or null"
+        required: true
+        type: string
+      min-points:
+        description: "Minimum points for the challenge"
+        required: false
+        type: number
+        default: 10
+      points:
+        description: "Maximum points for the challenge"
+        required: false
+        type: number
+        default: 1000
+
+jobs:
+  create_challenge:
+    name: Create challenge
+    uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@v1.0.0
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    with:
+      issue: ${{ github.event.inputs.issue }}
+      name: ${{ github.event.inputs.name }}
+      author: ${{ github.event.inputs.author }}
+      category: ${{ github.event.inputs.category }}
+      difficulty: ${{ github.event.inputs.difficulty }}
+      type: ${{ github.event.inputs.type }}
+      instanced_type: ${{ github.event.inputs.instanced_type }}
+      flag: ${{ github.event.inputs.flag }}
+      min-points: ${{ github.event.inputs.min-points }}
+      points: ${{ github.event.inputs.points }}
+      milestone: "CTF Challenges"
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"

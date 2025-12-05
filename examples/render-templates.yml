@@ -1,0 +1,12 @@
+name: Render all templates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render_templates:
+    name: Render all templates
+    uses: ctfpilot/challenge-ci/.github/workflows/render-templates.yml@v1.0.0
+    with:
+      runs-on: ubuntu-latest
+      toolkit-path: ./challenge-toolkit/

@@ -1,0 +1,17 @@
+name: Configure pages
+
+on:
+  push:
+    paths:
+      - "pages/**"
+  workflow_dispatch:
+
+jobs:
+  create_pages:
+    name: Create pages
+    uses: ctfpilot/challenge-ci/.github/workflows/configure-pages.yml@v1.0.0
+    permissions:
+      contents: write
+    with:
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"

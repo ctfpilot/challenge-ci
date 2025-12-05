@@ -1,0 +1,19 @@
+name: Configure challs
+
+on:
+  push:
+    paths:
+      - "challenges/**"
+  workflow_dispatch:
+
+jobs:
+  create_challenge:
+    name: Create challenge
+    uses: ctfpilot/challenge-ci/.github/workflows/configure-challs.yml@v1.0.0
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    with:
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"
