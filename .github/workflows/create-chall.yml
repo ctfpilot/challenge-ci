@@ -8,8 +8,8 @@ on:
       issue:
         description: "Existing issue to link the challenge to. Leave empty to create a new issue."
         required: false
-        type: number
-        default: 0
+        type: string
+        default: "0"
       name:
         description: "Name of the challenge"
         required: true
@@ -42,13 +42,13 @@ on:
       min-points:
         description: "Minimum points for the challenge"
         required: false
-        type: number
-        default: 10
+        type: string
+        default: "10"
       points:
         description: "Maximum points for the challenge"
         required: false
-        type: number
-        default: 1000
+        type: string
+        default: "1000"
       # Github settings
       pr-base:
         description: "Base branch for the pull request"
@@ -198,7 +198,7 @@ jobs:
         id: pr
         run: |
           ISSUE_TEXT=""
-          if [ "$INPUT_ISSUE" != 0 ]; then
+          if [ "$INPUT_ISSUE" != "0" ]; then
             ISSUE_TEXT=" This is the initial code for issue #$INPUT_ISSUE."
           fi
 
