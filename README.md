@@ -248,7 +248,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 
 ### Render All Templates
 
-**Workflow**: `render-templates.yml`
+**Workflow**: [`render-templates.yml`](.github/workflows/render-templates.yml)
 
 Renders templates for all challenges and pages in the repository. Useful for:
 
