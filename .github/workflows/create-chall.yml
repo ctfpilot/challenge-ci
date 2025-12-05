@@ -142,7 +142,9 @@ jobs:
       # Get slug
       - name: Get slug
         id: slugify
-        run: echo "slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify "$INPUT_NAME")" >> "$GITHUB_OUTPUT"
+        run: |
+          slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify "$INPUT_NAME")
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
         env:
           INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
           INPUT_NAME: ${{ inputs.name }}
