@@ -93,6 +93,13 @@ jobs:
             full_challenges=$(echo "$full_challenges" | cut -c 2-)
           fi
 
+          if [ -z "$full_challenges" ]; then  
+            echo "challenges=[]" >> $GITHUB_OUTPUT  
+            echo "No challenges found after filtering categories."  
+            echo "::notice title=No challenges found::No challenges found after filtering categories."
+            exit 0  
+          fi
+
           # Convert to json array
           full_challenges=$(echo "$full_challenges" | jq -R 'split(",")')
           challenges=$(echo "$full_challenges" | tr -d '\n')
