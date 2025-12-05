@@ -42,6 +42,7 @@ Creates a new challenge with all necessary scaffolding and metadata. This workfl
 - Generates challenge metadata file
 - Creates a new branch and pull request
 - Creates or links to an associated GitHub issue
+- Create GitHub labels for the challenge
 
 **When to use**: When setting up a new challenge.
 

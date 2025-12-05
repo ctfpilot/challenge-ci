@@ -158,6 +158,41 @@ jobs:
           create_branch: true
           branch: challenge/${{ steps.slugify.outputs.slug }}
 
+      # Create missing labels
+      - name: Create missing labels
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const labels = [
+                { name: 'Challenge', color: 'D4CE2F', description: 'Indicates that the issue or PR is related to a challenge.' },
+                { name: `Category: ${process.env.INPUT_CATEGORY}`, color: '082D37', description: `Indicates the category of the challenge: ${process.env.INPUT_CATEGORY}.` },
+                { name: `Difficulty: ${process.env.INPUT_DIFFICULTY}`, color: 'D93F0B', description: `Indicates the difficulty level of the challenge: ${process.env.INPUT_DIFFICULTY}.` }
+            ];
+
+            const existingLabels = await github.rest.issues.listLabelsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+            });
+
+            for (const label of labels) {
+                if (!existingLabels.data.find(l => l.name === label.name)) {
+                    await github.rest.issues.createLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: label.name,
+                        color: label.color,
+                        description: label.description,
+                    });
+                    console.log(`Created label: ${label.name}`);
+                } else {
+                    console.log(`Label already exists: ${label.name}`);
+                }
+            }
+        env:
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+
       # Open pull request
       - name: Open pull request
         id: pr
