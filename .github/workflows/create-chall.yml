@@ -203,6 +203,33 @@ jobs:
           INPUT_CATEGORY: ${{ inputs.category }}
           INPUT_DIFFICULTY: ${{ inputs.difficulty }}
 
+      # Create milestone if it doesn't exist
+      - name: Create milestone if not exists
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const milestoneTitle = process.env.INPUT_MILESTONE;
+
+            const milestones = await github.rest.issues.listMilestones({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+            });
+
+            if (!milestones.data.find(m => m.title === milestoneTitle)) {
+                await github.rest.issues.createMilestone({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title: milestoneTitle,
+                });
+                console.log(`Created milestone: ${milestoneTitle}`);
+            } else {
+                console.log(`Milestone already exists: ${milestoneTitle}`);
+            }
+        env:
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+
       # Open pull request
       - name: Open pull request
         id: pr
