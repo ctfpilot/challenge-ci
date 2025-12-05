@@ -1,0 +1,15 @@
+name: Render all templates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render_templates:
+    name: Render all templates
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    uses: ctfpilot/challenge-ci/.github/workflows/render-templates.yml@main
+    permissions:
+      contents: write
+    with:
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"

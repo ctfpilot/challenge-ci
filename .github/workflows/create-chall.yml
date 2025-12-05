@@ -1,0 +1,357 @@
+name: Create challenge
+run-name: Create challenge ${{ inputs.name }} by ${{ inputs.author }}
+
+on:
+  workflow_call:
+    inputs:
+      # Challenge inputs
+      issue:
+        description: "Existing issue to link the challenge to. Leave empty to create a new issue."
+        required: false
+        type: string
+        default: "0"
+      name:
+        description: "Name of the challenge"
+        required: true
+        type: string
+      author:
+        description: "Author of the challenge - Your alias"
+        required: true
+        type: string
+      category:
+        description: "Category of the challenge"
+        required: true
+        type: string
+      difficulty:
+        description: "Difficulty of the challenge"
+        required: true
+        type: string
+      type:
+        description: "Type of the challenge"
+        required: true
+        type: string
+      instanced_type:
+        description: "Type of the instanced challenge"
+        required: false
+        type: string
+        default: "none"
+      flag:
+        description: "Flag of the challenge"
+        required: true
+        type: string
+      min-points:
+        description: "Minimum points for the challenge"
+        required: false
+        type: string
+        default: "10"
+      points:
+        description: "Maximum points for the challenge"
+        required: false
+        type: string
+        default: "1000"
+      # GitHub settings
+      pr-base:
+        description: "Base branch for the pull request"
+        required: false
+        type: string
+        default: "develop"
+      milestone:
+        description: "Milestone to assign the issue and PR to"
+        required: false
+        type: string
+        default: "Challenges"
+      # Workflow settings
+      runs-on:
+        description: "The runner to use for the workflow"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      toolkit-path:
+        description: "Path to the CTF Pilot's Challenge Toolkit"
+        required: false
+        type: string
+        default: "./challenge-toolkit/"
+      fetch-submodules:
+        description: "Whether to fetch git submodules"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  create_challenge:
+    name: Create challenge
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    outputs:
+      pr: ${{ steps.pr.outputs.pr_url }}
+      slug: ${{ steps.slugify.outputs.slug }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Ensure submodules are fetched
+        if: ${{ inputs.fetch-submodules == true }}
+        run: git submodule update --init --recursive
+
+      # Install python and dependencies
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install python dependencies
+        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      # Create challenge
+      - name: Create challenge
+        run: |
+          python3 "$INPUT_TOOLKIT"/src/ctf.py create \
+            --name "$INPUT_NAME" \
+            --category "$INPUT_CATEGORY" \
+            --difficulty "$INPUT_DIFFICULTY" \
+            --author "$INPUT_AUTHOR" \
+            --points "$INPUT_POINTS" \
+            --min-points "$INPUT_MIN_POINTS" \
+            --flag "$INPUT_FLAG" \
+            --type "$INPUT_TYPE" \
+            --instanced-type "$INPUT_INSTANCED_TYPE" \
+            --no-prompts
+        env:
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_FLAG: ${{ inputs.flag }}
+          INPUT_TYPE: ${{ inputs.type }}
+          INPUT_INSTANCED_TYPE: ${{ inputs.instanced_type }}
+          INPUT_POINTS: ${{ inputs.points || 1000 }}
+          INPUT_MIN_POINTS: ${{ inputs.min-points || 10 }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      # Get slug
+      - name: Get slug
+        id: slugify
+        run: |
+          slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify "$INPUT_NAME")
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_NAME: ${{ inputs.name }}
+
+      # Check if challenge branch already exists (remote)
+      - name: Check if challenge branch exists
+        run: |
+          # Fetch all branches from origin so remote refs are available locally
+          git fetch origin
+
+          # Check if the branch exists on the remote (origin)
+          if git show-ref --verify --quiet refs/remotes/origin/challenge/$INPUT_SLUG; then
+            echo "::error title=Challenge already exists::The remote challenge branch 'origin/challenge/$INPUT_SLUG' already exists, indicating that the challenge has already been created. Please delete the remote branch and try again."
+            exit 1
+          else
+            echo "Challenge branch does not exist on origin. Proceeding..."
+          fi
+        env:
+          INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
+
+      # Check if pr base branch exists
+      - name: Check if PR base branch exists
+        run: |
+          if ! git show-ref --verify --quiet refs/heads/$INPUT_PR_BASE && ! git show-ref --verify --quiet refs/remotes/origin/$INPUT_PR_BASE; then
+            echo "::error title=Base branch does not exist::The specified base branch '$INPUT_PR_BASE' does not exist. Please provide a valid base branch for the pull request."
+            exit 1
+          else
+            echo "Base branch '$INPUT_PR_BASE' exists. Proceeding..."
+          fi
+        env:
+          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
+
+      # Commit changes to new branch
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Create challenge: ${{ inputs.name }} by ${{ inputs.author }}"
+          create_branch: true
+          branch: challenge/${{ steps.slugify.outputs.slug }}
+
+      # Create missing labels
+      - name: Create missing labels
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const labels = [
+                { name: 'Challenge', color: 'D4CE2F', description: 'Indicates that the issue or PR is related to a challenge.' },
+                { name: `Category: ${process.env.INPUT_CATEGORY}`, color: '082D37', description: `Indicates the category of the challenge: ${process.env.INPUT_CATEGORY}.` },
+                { name: `Difficulty: ${process.env.INPUT_DIFFICULTY}`, color: 'D93F0B', description: `Indicates the difficulty level of the challenge: ${process.env.INPUT_DIFFICULTY}.` }
+            ];
+
+            const existingLabels = await github.rest.issues.listLabelsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+            });
+
+            for (const label of labels) {
+                if (!existingLabels.data.find(l => l.name === label.name)) {
+                    await github.rest.issues.createLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: label.name,
+                        color: label.color,
+                        description: label.description,
+                    });
+                    console.log(`Created label: ${label.name}`);
+                } else {
+                    console.log(`Label already exists: ${label.name}`);
+                }
+            }
+        env:
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+
+      # Create milestone if it doesn't exist
+      - name: Create milestone if not exists
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const milestoneTitle = process.env.INPUT_MILESTONE;
+
+            const milestones = await github.rest.issues.listMilestones({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+            });
+
+            if (!milestones.data.find(m => m.title === milestoneTitle)) {
+                await github.rest.issues.createMilestone({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title: milestoneTitle,
+                });
+                console.log(`Created milestone: ${milestoneTitle}`);
+            } else {
+                console.log(`Milestone already exists: ${milestoneTitle}`);
+            }
+        env:
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+
+      # Open pull request
+      - name: Open pull request
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let issueText = "";
+            if (process.env.INPUT_ISSUE !== "0") {
+              issueText = ` This is the initial code for issue #${process.env.INPUT_ISSUE}.`;
+            }
+
+            const { data: pr } = await github.rest.pulls.create({
+              maintainer_can_modify: true,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Create challenge: ${process.env.INPUT_NAME}`,
+              head: `challenge/${process.env.INPUT_SLUG}`,
+              base: process.env.INPUT_PR_BASE || 'develop',
+              body: `Create challenge: ${process.env.INPUT_NAME} by ${process.env.INPUT_AUTHOR}. This PR was automatically generated.${issueText}`,
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['Challenge', `Category: ${process.env.INPUT_CATEGORY}`, `Difficulty: ${process.env.INPUT_DIFFICULTY}`],
+            });
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              assignees: [context.actor],
+            });
+            const milestones = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+            });
+            const milestone = milestones.data.find(m => m.title === (process.env.INPUT_MILESTONE || 'Challenges'));
+            if (milestone) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                milestone: milestone.number,
+              });
+            }
+
+            core.setOutput('pr_url', pr.html_url);
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+          INPUT_SLUG: ${{ steps.slugify.outputs.slug }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}
+          INPUT_PR_BASE: ${{ inputs.pr-base || 'develop' }}
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+          INPUT_ISSUE: ${{ inputs.issue }}
+
+  create_issue:
+    if: ${{ inputs.issue == '0' }}
+    name: Create issue
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    needs:
+      - create_challenge
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      # Create issue
+      - name: Create issue
+        run: |
+          BODY=$(cat <<EOF
+          Challenge: $INPUT_NAME by $INPUT_AUTHOR.
+
+          - **Flag:** $INPUT_FLAG
+          - **Instanced:** $INPUT_INSTANCED
+          - **Instanced type:** $INPUT_INSTANCED_TYPE
+
+          Challenge branch: [challenge/$INPUT_SLUG](/$GH_REPO/tree/challenge/$INPUT_SLUG)
+
+          Initial code has been generated in $GH_PR.
+
+          Automatic challenge creation was done by the $GH_ACTOR.
+          EOF
+          )
+
+          gh issue create --title "$INPUT_NAME" --body "$BODY" \
+            --label "Challenge" --label "Category: $INPUT_CATEGORY" --label "Difficulty: $INPUT_DIFFICULTY" \
+            --assignee "$GH_ACTOR" \
+            --milestone "$INPUT_MILESTONE"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_REPO: ${{ github.repository }}
+          GH_PR: ${{ needs.create_challenge.outputs.pr }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_SLUG: ${{ needs.create_challenge.outputs.slug }}
+          INPUT_MILESTONE: ${{ inputs.milestone || 'Challenges' }}
+          INPUT_AUTHOR: ${{ inputs.author }}
+          INPUT_FLAG: ${{ inputs.flag }}
+          INPUT_INSTANCED: ${{ inputs.type == 'instanced' && 'Yes' || 'No' }}
+          INPUT_INSTANCED_TYPE: ${{ inputs.instanced_type }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_DIFFICULTY: ${{ inputs.difficulty }}

@@ -1,0 +1,167 @@
+name: Configure pages
+
+on:
+  workflow_call:
+    inputs:
+      # Workflow settings
+      runs-on:
+        description: "The runner to use for the workflow"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      toolkit-path:
+        description: "Path to the CTF Pilot's Challenge Toolkit"
+        required: false
+        type: string
+        default: "./challenge-toolkit/"
+      fetch-submodules:
+        description: "Whether to fetch git submodules"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  get_pages:
+    name: Get pages
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    outputs:
+      pages: ${{ steps.get-pages.outputs.pages }}
+      changes: ${{ steps.check-changes.outputs.changes }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Ensure submodules are fetched
+        if: ${{ inputs.fetch-submodules == true }}
+        run: git submodule update --init --recursive
+      - name: Get pages
+        id: get-pages
+        # Get all directories in the pages directory and output them as comma separated string
+        run: |
+          if [ -d "pages" ] && [ "$(ls -A pages)" ]; then
+            pages=$(echo "$(ls pages)" | tr ' ' ',')
+          else
+            echo "Warning: 'pages' directory does not exist or is empty."
+            echo "::notice title=No pages found::The 'pages' directory is missing or empty. No pages to process."
+            pages=""
+          fi
+          echo "pages=$pages" >> $GITHUB_OUTPUT
+      - name: Print pages
+        run: echo "$INPUT_PAGES"
+        env:
+          INPUT_PAGES: ${{ steps.get-pages.outputs.pages }}
+
+      - name: Generate paths filter for pages
+        id: generate-paths-filter
+        run: |
+          touch paths-filter.yml
+
+          pages=$(echo "$INPUT_PAGES")
+          if [ -z "$pages" ]; then
+            echo "No pages found, skipping page retrieval."
+            echo "::debug::No pages found, exiting."
+            exit 0
+          fi
+
+          echo "Generating paths filter for pages..."
+          for page in $(echo "$pages" | tr ',' ' '); do
+            echo "$page:" >> paths-filter.yml
+            echo "  - pages/$page/**" >> paths-filter.yml
+          done
+        env:
+          INPUT_PAGES: ${{ steps.get-pages.outputs.pages }}
+
+      - name: Check if this update contains changes in any page
+        if: ${{ steps.get-pages.outputs.pages != '' }}
+        id: check-changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: paths-filter.yml
+          base: ${{ github.event.pull_request.base.ref || github.ref_name }}
+
+  # Matrix strategy to run the template rendering for each page
+  ci:
+    if: ${{ needs.get_pages.outputs.pages != '' && needs.get_pages.outputs.changes && needs.get_pages.outputs.changes != '[]' }}
+    strategy:
+      matrix:
+        page: ${{ fromJson(needs.get_pages.outputs.changes) }}
+    name: Template rendering
+    needs:
+      - get_pages
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Ensure submodules are fetched
+        if: ${{ inputs.fetch-submodules == true }}
+        run: git submodule update --init --recursive
+
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install python dependencies
+        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+
+      # -----------------------------------
+      # Template rendering
+      # -----------------------------------
+
+      - name: Render page template
+        id: render
+        run: |
+          python3 "$INPUT_TOOLKIT"/src/ctf.py page "$INPUT_PAGE"
+        env:
+          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_PAGE: ${{ matrix.page }}
+
+      # -----------------------------------
+      # Upload
+      # -----------------------------------
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add and commit changes
+        run: |
+          git add pages/**
+          git diff --cached --quiet || git commit -m "CI: Update pages [skip ci]"
+
+      - name: Push changes
+        run: |
+          set -euo pipefail
+          BRANCH="$REF_NAME"
+
+          # Try a few times to avoid race conditions when multiple runs push concurrently.
+          tries=10
+          attempt=1
+          while [ $attempt -le $tries ]; do
+            echo "Attempt $attempt: fetch+rebase"
+            git fetch origin "$BRANCH"
+            git pull --rebase --no-edit origin "$BRANCH"
+
+            echo "Attempt $attempt: push"
+            if git push origin "$BRANCH"; then
+              echo "Push succeeded on attempt $attempt"
+              break
+            fi
+
+            echo "Push failed on attempt $attempt, retrying after backoff"
+            sleep $((attempt * 2))
+            attempt=$((attempt + 1))
+          done
+
+          if [ $attempt -gt $tries ]; then
+            echo "Failed to push after $tries attempts"
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}

@@ -1,0 +1,20 @@
+name: Configure challs
+
+on:
+  push:
+    paths:
+      - "challenges/**"
+  workflow_dispatch:
+
+jobs:
+  create_challenge:
+    name: Create challenge
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    uses: ctfpilot/challenge-ci/.github/workflows/configure-challs.yml@main
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    with:
+      runs-on: "ubuntu-latest"
+      toolkit-path: "./challenge-toolkit/"
