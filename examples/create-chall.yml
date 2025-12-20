@@ -81,7 +81,7 @@ on:
 jobs:
   create_challenge:
     name: Create challenge
-    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.1`)
     uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@main
     permissions:
       contents: write
