@@ -89,7 +89,7 @@ on:
 
 jobs:
   create:
-    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.1`)
     uses: ctfpilot/challenge-ci/.github/workflows/create-chall.yml@main
     permissions:
       contents: write
@@ -112,7 +112,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Required inputs**:
 
@@ -170,7 +170,7 @@ on:
 
 jobs:
   configure:
-    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.1`)
     uses: ctfpilot/challenge-ci/.github/workflows/configure-challs.yml@main
     permissions:
       contents: write
@@ -187,7 +187,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -228,7 +228,7 @@ on:
 
 jobs:
   configure:
-    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.1`)
     uses: ctfpilot/challenge-ci/.github/workflows/configure-pages.yml@main
     permissions:
       contents: write
@@ -243,7 +243,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -278,7 +278,7 @@ on:
 
 jobs:
   render:
-    # Please change `@main` to a specific version tag (e.g., `@v1.0.0`)
+    # Please change `@main` to a specific version tag (e.g., `@v1.0.1`)
     uses: ctfpilot/challenge-ci/.github/workflows/render-templates.yml@main
     permissions:
       contents: write
@@ -293,7 +293,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.0` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
