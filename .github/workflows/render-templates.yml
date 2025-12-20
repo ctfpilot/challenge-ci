@@ -50,7 +50,8 @@ jobs:
         id: challenges
         run: |
           if [ -d "challenges" ] && [ "$(ls -A challenges)" ]; then
-            categories=$(echo "$(ls challenges)" | tr ' ' ',')
+            categories="$(ls challenges)"
+            categories=$(echo $categories | tr ' ' ',')
           else
             echo "Warning: 'challenges' directory does not exist or is empty."
             echo "::notice title=No challenges found::The 'challenges' directory is missing or empty. No challenges to process."
