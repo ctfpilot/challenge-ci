@@ -112,7 +112,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.1 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Required inputs**:
 
@@ -187,7 +187,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.1 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -243,7 +243,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.1 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
@@ -293,7 +293,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 > [!IMPORTANT]
 > To prevent supply chain attacks, please always pin the version of the workflow you are using.  
 > Our examples use `@main` for simplicity, but must be changed to a specific version tag in production.  
-> For example, use `@v1.0.1` to pin to version 1.0.0 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
+> For example, use `@v1.0.1` to pin to version 1.0.1 of the workflow. [See available versions](https://github.com/ctfpilot/challenge-ci/releases).
 
 **Optional inputs**:
 
