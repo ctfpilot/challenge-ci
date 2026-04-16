@@ -25,12 +25,21 @@ The workflows are designed to be called from your challenge repository, enabling
 
 | Component                                                                      | Version |
 | ------------------------------------------------------------------------------ | ------- |
-| [CTF Pilot's Challenge Toolkit](https://github.com/ctfpilot/challenge-toolkit) | v1.0+   |
+| [CTF Pilot's Challenge Toolkit](https://github.com/ctfpilot/challenge-toolkit) | v2.0+   |
 | [CTF Pilot's Challenge Schema](https://github.com/ctfpilot/challenge-schema)   | v1.0+   |
 | [CTF Pilot's Page Schema](https://github.com/ctfpilot/page-schema)             | v1.0+   |
 | [kube-ctf](https://github.com/ctfpilot/kube-ctf)                               | v1.0+   |
 
 ## Workflows
+
+The workflows makes use of the CTF Pilot's Challenge Toolkit for processing challenges and pages.
+This toolkit is available at [ctfpilot/challenge-toolkit](https://github.com/ctfpilot/challenge-toolkit).
+
+The workflow automatically defaults to using an up-to-date version (v2.0+) of the Challenge Toolkit, but it can be overwritten with the `toolkit-cli`, `toolkit-install-package`, and `toolkit-version` inputs, allowing you to use a custom version or installation of the toolkit if desired.
+
+> [!IMPORTANT]
+> Since v2.0 of the Challenge CI, the Challenge toolkit is no longer used from a local installation, but is instead installed as a package using uv.
+> If you are upgrading and uses a custom Challenge Toolkit, you will need to make your custom Challenge Toolkit installation available to download using uv and update your workflow calls to specify the `toolkit-install-package` and `toolkit-version` inputs.
 
 ### Create Challenge
 
@@ -103,7 +112,6 @@ jobs:
       type: ${{ inputs.type }}
       flag: ${{ inputs.flag }}
       points: ${{ inputs.points }}
-      toolkit-path: "./challenge-toolkit/"
 ```
 
 See the full example in [`examples/create-chall.yml`](examples/create-chall.yml).  
@@ -132,7 +140,9 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 - `pr-base`: Base branch for PR (default: `develop`)
 - `milestone`: GitHub milestone (default: `Challenges`)
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`)
+- `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
+- `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
@@ -178,7 +188,6 @@ jobs:
       id-token: write
     with:
       runs-on: "ubuntu-latest"
-      toolkit-path: "./challenge-toolkit/"
 ```
 
 See the full example in [`examples/configure-challs.yml`](examples/configure-challs.yml).  
@@ -192,7 +201,9 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`)
+- `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
+- `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
@@ -234,7 +245,6 @@ jobs:
       contents: write
     with:
       runs-on: "ubuntu-latest"
-      toolkit-path: "./challenge-toolkit/"
 ```
 
 See the full example in [`examples/configure-pages.yml`](examples/configure-pages.yml).  
@@ -248,7 +258,9 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`)
+- `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
+- `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
@@ -284,7 +296,6 @@ jobs:
       contents: write
     with:
       runs-on: "ubuntu-latest"
-      toolkit-path: "./challenge-toolkit/"
 ```
 
 See the full example in [`examples/render-templates.yml`](examples/render-templates.yml).  
@@ -298,7 +309,9 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-path`: Path to Challenge Toolkit (default: `./challenge-toolkit/`)
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`)
+- `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
+- `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
 
 **Permissions required**:
@@ -309,8 +322,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 
 ### Prerequisites
 
-- A GitHub repository with your CTF challenges
-- [CTF Pilot's Challenge Toolkit](https://github.com/ctfpilot/challenge-toolkit) installed as a submodule or included in your repository
+- A GitHub repository with your CTF challenges, following the structure outlined in the [Challenge Repository Structure](#challenge-repository-structure) section below
 - Appropriate GitHub secrets and repository configuration
 
 ### Integration Steps
@@ -323,10 +335,8 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
    - Ensure your GitHub Actions workflow has write access to GHCR
    - Configure appropriate permissions in your repository
 
-3. **Ensure Challenge Toolkit is available**:
-   - Add as a git submodule: `git submodule add https://github.com/ctfpilot/challenge-toolkit`
-   - Or copy the toolkit directory into your repository
-   - Update `toolkit-path` in workflow calls if needed
+3. **Ensure templates are ready**:
+   - Copy the toolkit templates into `template/` directory of your repository. Templates can be found in the [Challenge Toolkit repository](https://github.com/ctfpilot/challenge-toolkit/tree/main/template).
 
 4. **Commit and test**:
    - Test workflows manually via GitHub Actions UI
@@ -356,7 +366,9 @@ For detailed information about challenge structure and schema, see the [Challeng
 All workflows support customization through inputs:
 
 - **`runs-on`**: Specify different GitHub Actions runners (e.g., `ubuntu-latest`, self-hosted runner)
-- **`toolkit-path`**: Adjust if your Challenge Toolkit is in a non-standard location
+- **`toolkit-version`**: Version of Challenge Toolkit to use (default: `v2.0.0`)
+- **`toolkit-install-package`**: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
+- **`toolkit-cli`**: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - **`fetch-submodules`**: Specify if submodules should be fetched (default: `true`)
 
 For more advanced customization, fork this repository and modify the workflows as needed, then reference your fork in your challenge repository workflows.
