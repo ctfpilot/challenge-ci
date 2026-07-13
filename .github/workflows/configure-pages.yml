@@ -31,6 +31,9 @@ on:
           The version of the CTF Pilot's Challenge Toolkit to use.
           Must be a version available that can be installed with uv.
           Current version is v2.0.0.
+
+          If set, the toolkit install package is installed with the specified version using `uv tool install <package>==<version>`. 
+          If not set, the toolkit install package is installed without a version constraint, allowing to use git based installations or other versioning methods.
         required: false
         type: string
         default: "v2.0.0"
@@ -128,9 +131,9 @@ jobs:
         with:
           enable-cache: true
       - name: Install python dependencies
-        run: uv tool install $INPUT_TOOLKIT_INSTALL_PACKAGE@$INPUT_TOOLKIT_VERSION
+        run: uv tool install $INPUT_TOOLKIT_INSTALL_PACKAGE==$INPUT_TOOLKIT_VERSION
         env:
-          INPUT_TOOLKIT_VERSION: ${{ inputs.toolkit-version }}
+          INPUT_TOOLKIT_VERSION: ${{ inputs.toolkit-version != '' && format('=={0}', inputs.toolkit-version) || '' }}
           INPUT_TOOLKIT_INSTALL_PACKAGE: ${{ inputs.toolkit-install-package }}
 
       # -----------------------------------
