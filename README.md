@@ -32,14 +32,14 @@ The workflows are designed to be called from your challenge repository, enabling
 
 ## Workflows
 
-The workflows uses the CTF Pilot's Challenge Toolkit for processing challenges and pages.
+The workflows use the CTF Pilot's Challenge Toolkit for processing challenges and pages.
 This toolkit is available at [ctfpilot/challenge-toolkit](https://github.com/ctfpilot/challenge-toolkit).
 
-The workflow is by default locked to a specific version (currently `v2.0.0`) of the Challenge Toolkit, but it can be overwritten with the `toolkit-cli`, `toolkit-install-package`, and `toolkit-version` inputs, allowing you to use a custom version or installation of the toolkit if desired.
+The workflows is by default locked to a specific version (currently `v2.0.0`) of the Challenge Toolkit, but it can be overwritten with the `toolkit-cli`, `toolkit-install-package`, and `toolkit-version` inputs, allowing you to use a custom version or installation of the toolkit if desired.
 
 > [!IMPORTANT]
 > Since v2.0 of the Challenge CI, the Challenge toolkit is no longer used from a local installation, but is instead installed as a package using uv.
-> If you are upgrading and use a custom Challenge Toolkit, you will need to make your custom Challenge Toolkit installation available to download using uv and update your workflow calls to specify the `toolkit-install-package` and `toolkit-version` inputs. The `toolkit-version` may be set to an empty string, to install git hostet tool or does not want to pin to a specific version.
+> If you are upgrading and use a custom Challenge Toolkit, you will need to make your custom Challenge Toolkit installation available to download using uv and update your workflow calls to specify the `toolkit-install-package` and `toolkit-version` inputs. The `toolkit-version` may be set to an empty string, to allow for installing from git.
 
 ### Create Challenge
 
@@ -140,7 +140,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 - `pr-base`: Base branch for PR (default: `develop`)
 - `milestone`: GitHub milestone (default: `Challenges`)
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When set, binds the toolkit install package to a specific version.
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When not an empty string, binds the toolkit install package to a specific version.
 - `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
 - `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
@@ -201,7 +201,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When set, binds the toolkit install package to a specific version.
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When not an empty string, binds the toolkit install package to a specific version.
 - `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
 - `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
@@ -258,7 +258,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When set, binds the toolkit install package to a specific version.
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When not an empty string, binds the toolkit install package to a specific version.
 - `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
 - `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
@@ -309,7 +309,7 @@ Place the workflow in your challenge repository's `.github/workflows/` directory
 **Optional inputs**:
 
 - `runs-on`: GitHub Actions runner (default: `ubuntu-latest`)
-- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When set, binds the toolkit install package to a specific version.
+- `toolkit-version`: Version of Challenge Toolkit to use (default: `v2.0.0`). When not an empty string, binds the toolkit install package to a specific version.
 - `toolkit-install-package`: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
 - `toolkit-cli`: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - `fetch-submodules`: Specify if submodules should be fetched (default: `true`)
@@ -366,7 +366,7 @@ For detailed information about challenge structure and schema, see the [Challeng
 All workflows support customization through inputs:
 
 - **`runs-on`**: Specify different GitHub Actions runners (e.g., `ubuntu-latest`, self-hosted runner)
-- **`toolkit-version`**: Version of Challenge Toolkit to use (default: `v2.0.0`). When set, binds the toolkit install package to a specific version.
+- **`toolkit-version`**: Version of Challenge Toolkit to use (default: `v2.0.0`). When not an empty string, binds the toolkit install package to a specific version.
 - **`toolkit-install-package`**: Package name to install Challenge Toolkit from (default: `challenge-toolkit`)
 - **`toolkit-cli`**: Challenge Toolkit CLI command (default: `challenge-toolkit`)
 - **`fetch-submodules`**: Specify if submodules should be fetched (default: `true`)

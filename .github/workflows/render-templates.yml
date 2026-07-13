@@ -33,7 +33,7 @@ on:
           Current version is v2.0.0.
 
           If set, the toolkit install package is installed with the specified version using `uv tool install <package>==<version>`. 
-          If not set, the toolkit install package is installed without a version constraint, allowing to use git based installations or other versioning methods.
+          If the version is an empty, the toolkit install package is installed without a version constraint, allowing to use git based installations or other versioning methods.
         required: false
         type: string
         default: "v2.0.0"
