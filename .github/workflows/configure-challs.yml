@@ -189,7 +189,7 @@ jobs:
         with:
           enable-cache: true
       - name: Install python dependencies
-        run: uv tool install $INPUT_TOOLKIT_INSTALL_PACKAGE==$INPUT_TOOLKIT_VERSION
+        run: uv tool install $INPUT_TOOLKIT_INSTALL_PACKAGE$INPUT_TOOLKIT_VERSION
         env:
           INPUT_TOOLKIT_VERSION: ${{ inputs.toolkit-version != '' && format('=={0}', inputs.toolkit-version) || '' }}
           INPUT_TOOLKIT_INSTALL_PACKAGE: ${{ inputs.toolkit-install-package }}
