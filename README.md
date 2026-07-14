@@ -35,7 +35,7 @@ The workflows are designed to be called from your challenge repository, enabling
 The workflows use the CTF Pilot's Challenge Toolkit for processing challenges and pages.
 This toolkit is available at [ctfpilot/challenge-toolkit](https://github.com/ctfpilot/challenge-toolkit).
 
-The workflows is by default locked to a specific version (currently `v2.0.0`) of the Challenge Toolkit, but it can be overwritten with the `toolkit-cli`, `toolkit-install-package`, and `toolkit-version` inputs, allowing you to use a custom version or installation of the toolkit if desired.
+The workflows are by default locked to a specific version (currently `v2.0.0`) of the Challenge Toolkit, but it can be overridden with the `toolkit-cli`, `toolkit-install-package`, and `toolkit-version` inputs, allowing you to use a custom version or installation of the toolkit if desired.
 
 > [!IMPORTANT]
 > Since v2.0 of the Challenge CI, the Challenge toolkit is no longer used from a local installation, but is instead installed as a package using uv.
