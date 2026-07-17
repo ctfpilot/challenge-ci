@@ -100,4 +100,3 @@ jobs:
       points: ${{ inputs.points }}
       milestone: "CTF Challenges"
       runs-on: "ubuntu-latest"
-      toolkit-path: "./challenge-toolkit/"

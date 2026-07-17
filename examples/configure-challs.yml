@@ -17,4 +17,3 @@ jobs:
       id-token: write
     with:
       runs-on: "ubuntu-latest"
-      toolkit-path: "./challenge-toolkit/"

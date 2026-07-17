@@ -66,11 +66,34 @@ on:
         required: false
         type: string
         default: "ubuntu-latest"
-      toolkit-path:
-        description: "Path to the CTF Pilot's Challenge Toolkit"
+      toolkit-cli:
+        description: |
+          The command to run the challenge toolkit CLI.
+          Defaults to `challenge-toolkit` if not provided.
         required: false
         type: string
-        default: "./challenge-toolkit/"
+        default: "challenge-toolkit"
+      toolkit-install-package:
+        description: |
+          Challenge toolkit installation package name.
+          Must be a package available that can be installed with uv.
+          Is combined with the toolkit-version input to determine the exact version to install.
+
+          Defaults to the official `challenge-toolkit` - https://github.com/ctfpilot/challenge-toolkit
+        required: false
+        default: "challenge-toolkit"
+        type: string
+      toolkit-version:
+        description: |
+          The version of the CTF Pilot's Challenge Toolkit to use.
+          Must be a version available that can be installed with uv.
+          Current version is 2.0.0.
+
+          If set, the toolkit install package is installed with the specified version using `uv tool install <package>==<version>`. 
+          If the version is an empty string, the toolkit install package is installed without a version constraint, allowing to use git-based installations or other versioning methods.
+        required: false
+        type: string
+        default: "2.0.0"
       fetch-submodules:
         description: "Whether to fetch git submodules"
         required: false
@@ -109,15 +132,20 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7
+        with:
+          enable-cache: true
       - name: Install python dependencies
-        run: cd "$INPUT_TOOLKIT"/src && pip install -r requirements.txt
+        run: uv tool install "$INPUT_TOOLKIT_INSTALL_PACKAGE$INPUT_TOOLKIT_VERSION"
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT_VERSION: ${{ inputs.toolkit-version != '' && format('=={0}', inputs.toolkit-version) || '' }}
+          INPUT_TOOLKIT_INSTALL_PACKAGE: ${{ inputs.toolkit-install-package }}
 
       # Create challenge
       - name: Create challenge
         run: |
-          python3 "$INPUT_TOOLKIT"/src/ctf.py create \
+          "$INPUT_TOOLKIT" create \
             --name "$INPUT_NAME" \
             --category "$INPUT_CATEGORY" \
             --difficulty "$INPUT_DIFFICULTY" \
@@ -138,16 +166,16 @@ jobs:
           INPUT_INSTANCED_TYPE: ${{ inputs.instanced_type }}
           INPUT_POINTS: ${{ inputs.points || 1000 }}
           INPUT_MIN_POINTS: ${{ inputs.min-points || 10 }}
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-cli || 'challenge-toolkit' }}
 
       # Get slug
       - name: Get slug
         id: slugify
         run: |
-          slug=$(python3 "$INPUT_TOOLKIT"/src/ctf.py slugify "$INPUT_NAME")
+          slug=$("$INPUT_TOOLKIT" slugify "$INPUT_NAME")
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
         env:
-          INPUT_TOOLKIT: ${{ inputs.toolkit-path || './challenge-toolkit/' }}
+          INPUT_TOOLKIT: ${{ inputs.toolkit-cli || 'challenge-toolkit' }}
           INPUT_NAME: ${{ inputs.name }}
 
       # Check if challenge branch already exists (remote)
