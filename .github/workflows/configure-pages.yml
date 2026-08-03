@@ -64,7 +64,7 @@ jobs:
         # Get all directories in the pages directory and output them as comma separated string
         run: |
           if [ -d "pages" ] && [ "$(ls -A pages)" ]; then
-            pages=$(echo "$(ls pages)" | tr ' ' ',')
+            pages=$(echo $(ls pages) | tr ' ' ',')
           else
             echo "Warning: 'pages' directory does not exist or is empty."
             echo "::notice title=No pages found::The 'pages' directory is missing or empty. No pages to process."
